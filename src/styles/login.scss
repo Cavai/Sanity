@@ -1,0 +1,78 @@
+#login {
+
+  width: 100vw;
+  height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .sign_in_error_container {
+    position: absolute;
+    top: 35px;
+
+    width: 500px;
+    margin: 0 100px;
+  }
+
+  .sign_in_container {
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 750px;
+
+    .sign_in_left {
+      flex: 1;
+
+      h1 {
+        color: #404040;
+        font-weight: 300;
+        font-size: 44px;
+
+        text-align: center;
+      }
+    }
+
+    .sign_in_right {
+      flex: 1;
+
+      .sign_in_card {
+
+        display: flex;
+        flex-direction: column;
+
+        justify-content: space-evenly;
+        align-items: center;
+
+        background: #FFFFFF;
+        border-radius: 2.5px;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 7%);
+
+        height: 200px;
+        width: 300px;
+
+        .sign_in_button {
+          background: #24292E;
+          color: #FFFFFF;
+          border-radius: 5px;
+          border-color: unset;
+
+          width: 90%;
+          height: 35px;
+          margin-top: 25px;
+
+          font-size: 14px;
+          font-weight: 600;
+
+          span span {
+            line-height: 22px;
+          }
+        }
+      }
+    }
+
+  }
+
+}
