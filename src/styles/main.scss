@@ -3,6 +3,7 @@
 @import 'iview.scss';
 @import 'header.scss';
 @import 'login.scss';
+@import 'requests.scss';
 
 body {
   font-family: 'Noto Sans', sans-serif;
@@ -17,4 +18,15 @@ body {
 
 .logo_light path {
   fill: #FEFEFE;
+}
+
+.error_container {
+  position: absolute;
+  top: 25px;
+  left: calc(50% - 350px);
+
+  width: 500px;
+  margin: 0 100px;
+
+  z-index: 9999;
 }

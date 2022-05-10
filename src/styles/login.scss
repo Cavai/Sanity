@@ -7,14 +7,6 @@
   justify-content: center;
   align-items: center;
 
-  .sign_in_error_container {
-    position: absolute;
-    top: 35px;
-
-    width: 500px;
-    margin: 0 100px;
-  }
-
   .sign_in_container {
 
     display: flex;
@@ -38,7 +30,7 @@
     .sign_in_right {
       flex: 1;
 
-      .sign_in_card {
+      .sign_in_right_card {
 
         display: flex;
         flex-direction: column;
@@ -66,8 +58,14 @@
           font-size: 14px;
           font-weight: 600;
 
-          span span {
-            line-height: 22px;
+          span {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            span {
+              line-height: 22px;
+            }
           }
         }
       }

@@ -23,6 +23,13 @@ export default new Vuex.Store({
     userAuthenticated: false,
     authenticationToken: '',
     firebaseInstance: null,
+    expiryDate: new Date(),
+    cachedRepositories: null,
+    cachedPullRequests: null,
+    cachedIssues: null,
+  },
+  getters: {
+    isExpired: state => (new Date(state.expiryDate) < new Date()),
   },
   mutations: {
     authenticateUser: (state, user) => {
@@ -34,12 +41,29 @@ export default new Vuex.Store({
       state.userAuthenticated = false;
       state.authenticationToken = '';
       state.firebaseInstance = null;
+      state.cachedRepositories = null;
+      state.cachedPullRequests = null;
+      state.cachedIssues = null;
     },
     setToken: (state, token) => {
-      state.authToken = token;
+      state.authenticationToken = token;
     },
     setFirebaseInstance: (state, instance) => {
       state.firebaseInstance = instance;
     },
+    setExpiryDate: (state) => {
+      const date = new Date();
+      date.setDate(date.getDate() + 1); // 24hrs
+      state.expiryDate = date;
+    },
+    setCachedRepositories: (state, repos) => {
+      state.cachedRepositories = repos;
+    },
+    setCachedPulls: (state, pulls) => {
+      state.cachedPullRequests = pulls;
+    },
+    setCachedIssues: (state, issues) => {
+      state.cachedIssues = issues;
+    }
   }
 });

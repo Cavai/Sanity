@@ -1,3 +1,12 @@
+#header, .header-left, .header-right {
+  display: flex;
+  align-items: center;
+}
+
+.header-left, .header-right {
+  justify-content: space-around;
+}
+
 #header {
   position: sticky;
   top: 0;
@@ -6,15 +15,9 @@
 
   background: #333333;
 
-  display: flex;
   justify-content: space-between;
-  align-items: center;
 
-  nav {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-
+  .header-left {
     a {
       &.header_link_logo {
         position: relative;
@@ -36,11 +39,5 @@
     span {
       cursor: pointer;
     }
-  }
-
-  .header-right {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
   }
 }

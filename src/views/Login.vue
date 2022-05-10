@@ -1,9 +1,10 @@
 <template>
   <div id="login">
-    <div v-if="isNotOrganisationMember" class="sign_in_error_container">
+    <Spinner v-if="loadingData" />
+    <div v-if="isNotOrganisationMember" class="error_container">
       <Alert type="error" show-icon>
         <!-- TODO -->
-        You're not recognized as Cavai organisation member
+        You're not recognized as {{ organisationName }} organisation member
         <span slot="desc">
           Please contact your line manager.
         </span>
@@ -14,7 +15,7 @@
         <h1>Sign in</h1>
       </div>
       <div class="sign_in_right">
-        <div class="sign_in_card">
+        <div class="sign_in_right_card">
           <Logo />
           <Button
             size="large"
@@ -32,28 +33,47 @@
 
 <script>
 import Logo from '@/components/Logo.vue';
+import Spinner from '@/components/Spinner.vue';
 
-import { Octokit } from "@octokit/rest";
-import firebase from "firebase";
+import { Octokit } from '@octokit/rest';
+import firebase from 'firebase';
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'Login',
   components: {
     Logo,
+    Spinner,
   },
   data() {
     return {
+      loadingData: false,
       firebaseInitialized: false,
       firebaseInstance: null,
       isNotOrganisationMember: false,
+    }
+  },
+  computed: {
+    organisationName() {
+      return process.env.VUE_APP_ORGANISATION;
     }
   },
   methods: {
     authenticate() {
       if (!this.firebaseInitialized) {
         const firebaseConfig = {
-          // TODO
+          // apiKey: 'AIzaSyDYfDWvYccsTTcasEkH6jkHoqqftOUJw90',
+          // authDomain: 'cavai-sanity.firebaseapp.com',
+          // projectId: 'cavai-sanity',
+          // storageBucket: 'cavai-sanity.appspot.com',
+          // messagingSenderId: '208882602019',
+          // appId: '1:208882602019:web:fcdce3c29dba7df7526196'
+          apiKey: 'AIzaSyB2UOShXzyfXlqNLgOYg_hltKyW1lOPdw8',
+          authDomain: 'cavai-stream.firebaseapp.com',
+          projectId: 'cavai-stream',
+          storageBucket: 'cavai-stream.appspot.com',
+          messagingSenderId: '158678105420',
+          appId: '1:158678105420:web:3d2c77a47fc46ff1a4e3e9'
         };
 
         if (!firebase.apps.length) {
@@ -66,46 +86,114 @@ export default {
       }
 
       const provider = new firebase.auth.GithubAuthProvider();
-      provider.addScope("user");
+      provider.addScope('user');
 
       firebase
         .auth()
         .signInWithPopup(provider)
         .then(result => {
+          this.loadingData = true;
 
-          console.log(result);
-
-          const octokit = this.octokit = new Octokit({
+          const octokit = new Octokit({
             auth: result.credential.accessToken,
-            userAgent: "Cavai Sanity v0.1"
+            userAgent: 'Cavai Sanity v0.1',
           });
 
           octokit.orgs.getMembershipForUser({
-            org: "Cavai",
+            org: 'Cavai',
             username: result.additionalUserInfo.username,
           }).then(() => {
+
             this.isNotOrganisationMember = false;
 
-            this.$store.commit("authenticateUser", { username: result.additionalUserInfo.username, display: result.user.displayName });
-            this.$store.commit("setFirebaseInstance", this.firebaseInstance);
-            // TODO
-            this.$store.commit("setToken", '');
+            this.$store.commit('authenticateUser', { login: result.additionalUserInfo.username, display: result.user.displayName });
+            this.$store.commit('setFirebaseInstance', this.firebaseInstance);
+            this.$store.commit('setExpiryDate');
 
-            if (this.$route.query.to) {
-              this.$router.push(`/${this.$route.query.to}`);
-            } else {
-              this.$router.push("/requests");
-            }
+            this.prepareToken();
           }).catch(error => {
             console.error('User membership error: ', error.message);
+            this.loadingData = false;
             this.isNotOrganisationMember = true;
           })
         })
+    },
+    prepareToken() {
+      const octokit = new Octokit({
+        auth: process.env.VUE_APP_GH_TOKEN,
+        userAgent: 'Cavai Sanity v0.1'
+      });
+
+      octokit.rateLimit.get().then(({data}) => {
+        console.log(
+          `%c ** REMAINING_RATE_LIMIT ${data.rate.remaining} **`,
+          'background: #0D47A1; color: #FFFFFF',
+        );
+
+        if (data.rate.remaining >= 1500) {
+          // Main token
+          this.$store.commit('setToken', process.env.VUE_APP_GH_TOKEN);
+        } else {
+          // Alternative token
+          this.$store.commit('setToken', process.env.VUE_APP_GH_TOKEN_ALT);
+        }
+        this.preCacheData(octokit);
+      });
+    },
+    async preCacheData(octokit) {
+      // Repositories
+      const { data: repos } = await octokit.repos.listForOrg({
+          org: process.env.VUE_APP_ORGANISATION,
+          per_page: 100
+        });
+
+      this.$store.commit('setCachedRepositories', repos);
+
+      const pullsPromises = repos.map(repo => {
+        return octokit.pulls.list({
+          owner: process.env.VUE_APP_ORGANISATION,
+          repo: repo.name,
+          state: "open",
+          per_page: 100
+        });
+      });
+
+      const issuesPromises = repos.map(repo => {
+        return octokit.issues.listForRepo({
+          owner: process.env.VUE_APP_ORGANISATION,
+          repo: repo.name,
+          per_page: 100
+        });
+      });
+
+      // PRs
+      const pulls = await Promise.allSettled(pullsPromises);
+      this.$store.commit('setCachedPulls', pulls.map(pull => {
+        return {
+          repo: pull.value.url.split(`${process.env.VUE_APP_ORGANISATION}/`)[1].split("/pulls")[0],
+          url: pull.value.url,
+          data: pull.value.data,
+        }
+      }));
+
+      // Issues
+      const issues = await Promise.allSettled(issuesPromises);
+      this.$store.commit('setCachedIssues', issues.map(issue => {
+        return {
+          repo: issue.value.url.split(`${process.env.VUE_APP_ORGANISATION}/`)[1].split("/issues")[0],
+          url: issue.value.url,
+          data: issue.value.data,
+        }
+      }));
+
+      this.loadingData = false;
+
+      if (this.$route.query.to) {
+        this.$router.push(`/${this.$route.query.to}`);
+      } else {
+        this.$router.push("/requests");
+      }
     }
   }
 }
 </script>
-
-<style>
-
-</style>

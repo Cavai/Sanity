@@ -29,4 +29,4 @@ No integrations with other repos.
 
 ## Docs
 
-No documentations. 
+No documentations.

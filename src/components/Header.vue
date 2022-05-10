@@ -1,6 +1,6 @@
 <template>
   <div id="header">
-    <nav>
+    <nav class="header-left">
       <router-link to="/" class="header_link_logo">
         <Logo :height="18" :lightMode="true" />
       </router-link>
@@ -13,7 +13,7 @@
       <div v-if="exportAvailable" class="header-export">
         <span>EXPORT <Icon size="12" type="md-download" /></span>
       </div>
-      <div class="header-user">
+      <div v-if="$store.state.user" class="header-user">
         <span @click="logout">{{ $store.state.user.display }} <Icon size="12" type="md-exit" /></span>
       </div>
     </div>
@@ -63,7 +63,3 @@ export default {
   }
 }
 </script>
-
-<style>
-
-</style>

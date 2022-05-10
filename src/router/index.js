@@ -11,7 +11,7 @@ const routes = [
     name: 'Login',
     component: () => import(/* webpackChunkName: "start" */ "../views/Login.vue"),
     beforeEnter: (to, from, next) => {
-      if (store.state.userAuthenticated === false) {
+      if (!store.state.userAuthenticated || store.getters.isExpired) {
         next();
       } else {
         next({
@@ -26,7 +26,7 @@ const routes = [
     component: () => import(/* webpackChunkName: "start" */ "../views/Requests.vue"),
     props: true,
     beforeEnter: (to, from, next) => {
-      if (store.state.userAuthenticated === false) {
+      if (!store.state.userAuthenticated || store.getters.isExpired) {
         next({
           path: "/",
           query: { to: "requests" }
@@ -42,7 +42,7 @@ const routes = [
     component: () => import(/* webpackChunkName: "start" */ "../views/Stream.vue"),
     props: true,
     beforeEnter: (to, from, next) => {
-      if (store.state.userAuthenticated === false) {
+      if (!store.state.userAuthenticated || store.getters.isExpired) {
         next({
           path: "/",
           query: { to: "stream" }
@@ -58,7 +58,7 @@ const routes = [
     component: () => import(/* webpackChunkName: "start" */ "../views/Horizon.vue"),
     props: true,
     beforeEnter: (to, from, next) => {
-      if (store.state.userAuthenticated === false) {
+      if (!store.state.userAuthenticated || store.getters.isExpired) {
         next({
           path: "/",
           query: { to: "horizon" }
@@ -74,7 +74,7 @@ const routes = [
     component: () => import(/* webpackChunkName: "start" */ "../views/Utils.vue"),
     props: true,
     beforeEnter: (to, from, next) => {
-      if (store.state.userAuthenticated === false) {
+      if (!store.state.userAuthenticated || store.getters.isExpired) {
         next({
           path: "/",
           query: { to: "utils" }

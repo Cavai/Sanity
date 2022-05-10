@@ -1,0 +1,23 @@
+#requests {
+
+  .sub-header {
+    height: 45px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+
+    margin: 25px 30px;
+
+    h2 {
+      font-size: 21px;
+      line-height: 29px;
+      font-weight: 400;
+    }
+  }
+
+  #requests-table {
+    margin: 0 30px;
+  }
+
+}
