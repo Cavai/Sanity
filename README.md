@@ -20,8 +20,8 @@ For structural, procedural, and other aspects that pertain to all other repos.
 
 ## Owner
 
+- [@olszewa](https://github.com/olszewa)
 - [@mikkokotila](https://github.com/mikkokotila)
-- [@mrhakala](https://github.com/mrhakala)
 
 ## Integrations
 
