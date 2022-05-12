@@ -4,7 +4,7 @@ import Vuex from 'vuex';
 import createPersistedState from 'vuex-persistedstate';
 
 import SecureLS from 'secure-ls';
-const ls = new SecureLS({ isCompression: false });
+const ls = new SecureLS({ isCompression: true });
 
 Vue.use(Vuex);
 
@@ -24,7 +24,7 @@ export default new Vuex.Store({
     authenticationToken: '',
     firebaseInstance: null,
     expiryDate: new Date(),
-    cachedRepositories: null,
+    // cachedRepositories: null,
     cachedPullRequests: null,
     cachedIssues: null,
   },
@@ -41,9 +41,11 @@ export default new Vuex.Store({
       state.userAuthenticated = false;
       state.authenticationToken = '';
       state.firebaseInstance = null;
-      state.cachedRepositories = null;
+      // state.cachedRepositories = null;
       state.cachedPullRequests = null;
       state.cachedIssues = null;
+
+      sessionStorage.removeItem('cachedCommits');
     },
     setToken: (state, token) => {
       state.authenticationToken = token;
@@ -56,14 +58,14 @@ export default new Vuex.Store({
       date.setDate(date.getDate() + 1); // 24hrs
       state.expiryDate = date;
     },
-    setCachedRepositories: (state, repos) => {
-      state.cachedRepositories = repos;
-    },
+    // setCachedRepositories: (state, repos) => {
+    //   state.cachedRepositories = repos;
+    // },
     setCachedPulls: (state, pulls) => {
       state.cachedPullRequests = pulls;
     },
     setCachedIssues: (state, issues) => {
       state.cachedIssues = issues;
-    }
+    },
   }
 });

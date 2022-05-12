@@ -9,11 +9,14 @@ import ViewUI from 'view-design';
 import locale from 'view-design/dist/locale/en-US';
 import 'view-design/dist/styles/iview.css';
 
+import Trend from 'vuetrend';
+
 import '@/styles/main.scss';
 
 import VueJWT from 'vuejs-jwt';
 
 Vue.use(ViewUI, { locale });
+Vue.use(Trend);
 Vue.use(VueJWT);
 
 Vue.config.productionTip = false

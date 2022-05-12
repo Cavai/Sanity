@@ -8,6 +8,7 @@
     align-items: flex-end;
 
     margin: 25px 30px;
+    margin-top: 50px;
 
     h2 {
       font-size: 21px;
@@ -17,7 +18,78 @@
   }
 
   #requests-table {
-    margin: 0 30px;
+    margin: 30px 30px;
+
+    table {
+      border-radius: 55px;
+    }
+
+    tr {
+      th {
+        height: 50px;
+
+        color: #AFAFAF;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .03em;
+        text-transform: uppercase;
+
+        background: #FFFFFF;
+        border-bottom: 2px solid #DFDFDF;
+      }
+
+      td {
+        color: #202020;
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 18px;
+
+        height: 40px;
+
+        a {
+          color: #202020;
+        }
+
+        &:nth-child(4) {
+          font-family: 'Noto Sans Mono', monospace;
+        }
+      }
+    }
+
+    .engineers-container {
+      margin: 5px 0;
+
+      div {
+        margin: 5px 0;
+
+        .engineer-login {
+          margin-left: 5px;
+        }
+      }
+    }
+
+    .labels-container {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+
+      width: 100%;
+
+      .label {
+        margin: 5px 0;
+        padding: 0 7px;
+
+        border-width: 1px;
+        border-style: solid;
+        border-radius: 24px;
+
+        font-size: 11px;
+        font-weight: 500;
+        font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+
+        text-align: center;
+      }
+    }
   }
 
 }

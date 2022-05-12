@@ -8,10 +8,11 @@
 }
 
 #header {
-  position: sticky;
+  position: absolute;
   top: 0;
 
   height: 40px;
+  width: 100vw;
 
   background: #333333;
 

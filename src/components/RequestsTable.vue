@@ -1,22 +1,74 @@
 <template>
   <div id="requests-table">
-    <Table :columns="requestsHeaders" :data="data1"></Table>
+    <Table
+      :key="reRender"
+      :columns="requestsHeaders"
+      :data="tableData"
+      :disabled-hover="true"
+      @on-sort-change="sortTable"
+    >
+      <template slot-scope="{ row }" slot="issue">
+        <a :href="row.url" target="_blank">{{ row.issue }}</a>
+      </template>
+      <!-- eslint-disable-next-line vue/no-unused-vars -->
+      <template slot-scope="{ row }" slot="commits">
+        <span><SparkLine /></span>
+      </template>
+      <template slot-scope="{ row }" slot="progress">
+        <span>{{ row.tasks_done }}/{{ row.tasks_done + row.tasks_not_done}}</span>
+        <strong>&nbsp;({{ calculatePercent(row.tasks_done, row.tasks_not_done).toFixed(2) }} %)</strong>
+      </template>
+      <template slot-scope="{ row }" slot="stage">
+        <div class="labels-container">
+          <div
+            class="label"
+            :style="generateLabelStyles(row.stage, getStageLabelColor(row.stage))"
+          >
+            {{ row.stage }}
+          </div>
+        </div>
+      </template>
+      <template slot-scope="{ row }" slot="engineers">
+        <div class="engineers-container">
+          <div v-for="engineer in row.engineers" :key="engineer.login">
+            <Avatar :src="engineer.avatar_url" size="small" />
+            <span class="engineer-login">{{ engineer.login }}</span>
+          </div>
+        </div>
+      </template>
+    </Table>
   </div>
 </template>
 
 <script>
+import isDarkColor from 'is-dark-color';
+import moment from 'moment';
+
+import SparkLine from '@/components/SparkLine.vue';
+
 export default {
   name: 'RequestsTable',
+  props: {
+    rawData: {
+      type: Array
+    }
+  },
+  components: {
+    SparkLine,
+  },
   data () {
     return {
+      reRender: false,
       requestsHeaders: [
         {
           title: 'Name',
-          key: 'issue',
+          slot: 'issue',
+          sortable: true,
+          width: 500,
         },
         {
           title: 'Commits',
-          key: 'commits',
+          slot: 'commits',
         },
         {
           title: 'Last Commit',
@@ -24,52 +76,117 @@ export default {
         },
         {
           title: 'Progress',
-          key: 'progress',
+          slot: 'progress',
+          sortable: 'custom',
         },
         {
           title: "Stage",
+          slot: "stage",
           key: "stage",
+          sortable: true,
         },
         {
           title: "Engineer(s)",
-          key: "engineers",
+          slot: "engineers",
         }
       ],
-      data1: [
-        {
-          issue: 'Issue #1',
-          commits: '-*-*-',
-          last_commit: '2022-05-10',
-          progress: '10/20 (50%)',
-          stage: 'STAGE-1',
-          engineers: 'CavaiDev'
-        },
-        {
-          issue: 'Issue #2',
-          commits: '-*-*-',
-          last_commit: '2022-05-10',
-          progress: '10/20 (50%)',
-          stage: 'STAGE-1',
-          engineers: 'CavaiDev'
-        },
-        {
-          issue: 'Issue #3',
-          commits: '-*-*-',
-          last_commit: '2022-05-10',
-          progress: '10/20 (50%)',
-          stage: 'STAGE-1',
-          engineers: 'CavaiDev'
-        },
-        {
-          issue: 'Issue #4',
-          commits: '-*-*-',
-          last_commit: '2022-05-10',
-          progress: '10/20 (50%)',
-          stage: 'STAGE-1',
-          engineers: 'CavaiDev'
-        },
-      ]
+      tableData: [],
+      stageLabelColors: ['00ffff', 'fffe00', 'ff0ea7']
     }
-}
+  },
+  methods: {
+    calculatePercent(value, value2) {
+      const result = (value * 100 / (value + value2));
+      return isNaN(result) ? 0 : result;
+    },
+    countInString(searchFor, searchIn = "") {
+      let results = 0;
+      let a = searchIn.indexOf(searchFor);
+
+      while (a != -1) {
+        searchIn = searchIn.slice(a * 1 + searchFor.length);
+        results++;
+        a = searchIn.indexOf(searchFor);
+      }
+
+      return results;
+    },
+    generateLabelStyles(name, color) {
+      const value = `#${color}`;
+      return {
+        backgroundColor: value,
+        borderColor: value === "#ffffff" ? "gray" : "transparent",
+        color: isDarkColor(value) || color === 'ff0ea7' ? "white" : "black",
+        width:
+          name.length > 20 ? `${name.length * 8}px` : `${name.length * 15}px`
+      };
+    },
+    getStageLabelColor(stage) {
+      switch(stage) {
+        case 'STAGE-1':
+          return this.stageLabelColors[0];
+        case 'STAGE-2':
+          return this.stageLabelColors[1];
+        case 'STAGE-3':
+          return this.stageLabelColors[2];
+      }
+    },
+    sortTable(options) {
+      console.log(options);
+      if (options.column.title === 'Progress') {
+        if (options.order === 'asc') {
+          this.tableData.sort((a, b) => {
+            let aPerc = (a.tasks_done / (a.tasks_done + a.tasks_not_done)) * 100;
+            let bPerc = (b.tasks_done / (b.tasks_done + b.tasks_not_done)) * 100;
+
+            aPerc = isNaN(aPerc) ? 0 : aPerc;
+            bPerc = isNaN(bPerc) ? 0 : bPerc;
+
+            return aPerc - bPerc;
+          });
+        } else if (options.order === 'desc') {
+          this.tableData.sort((a, b) => {
+            let aPerc = (a.tasks_done / (a.tasks_done + a.tasks_not_done)) * 100;
+            let bPerc = (b.tasks_done / (b.tasks_done + b.tasks_not_done)) * 100;
+
+            aPerc = isNaN(aPerc) ? 0 : aPerc;
+            bPerc = isNaN(bPerc) ? 0 : bPerc;
+
+            return bPerc - aPerc;
+          });
+        } else {
+          this.tableData.sort((a, b) => {
+            return a.id - b.id;
+          });
+        }
+      }
+    }
+  },
+  watch: {
+    rawData() {
+      this.tableData = [...this.rawData.map(request => {
+
+        const workPhases = request.body.split("# Work Phases")[1];
+        const tasksDone = this.countInString("- [x]", workPhases);
+        const tasksNotDone = this.countInString("- [ ]", workPhases);
+
+        const commits = request.commits.length && request.commits.flat().map(commit => commit.commit.author.date).sort((a, b) => moment(b).format('X') - moment(a).format('X'));
+
+        return {
+          id: request.id,
+          issue: request.title,
+          url: request.html_url,
+          commits: '-*-*-',
+          last_commit: commits ? moment(commits[0]).format('DD MMM YYYY') : '-',
+          tasks_done: tasksDone,
+          tasks_not_done: tasksNotDone,
+          stage: request.labels.find(label => label.name.includes('STAGE')).name,
+          engineers: request.assignees,
+        }
+      })];
+
+      this.reRender = !this.reRender;
+    }
+  }
 }
 </script>

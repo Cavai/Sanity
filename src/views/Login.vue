@@ -32,6 +32,8 @@
 </template>
 
 <script>
+/* eslint-disable no-unused-vars */
+
 import Logo from '@/components/Logo.vue';
 import Spinner from '@/components/Spinner.vue';
 
@@ -147,7 +149,7 @@ export default {
           per_page: 100
         });
 
-      this.$store.commit('setCachedRepositories', repos);
+      // this.$store.commit('setCachedRepositories', repos);
 
       const pullsPromises = repos.map(repo => {
         return octokit.pulls.list({
@@ -168,23 +170,33 @@ export default {
 
       // PRs
       const pulls = await Promise.allSettled(pullsPromises);
-      this.$store.commit('setCachedPulls', pulls.map(pull => {
-        return {
-          repo: pull.value.url.split(`${process.env.VUE_APP_ORGANISATION}/`)[1].split("/pulls")[0],
-          url: pull.value.url,
-          data: pull.value.data,
+
+      const pullsFiltered = pulls.map(pullData => {
+        if (pullData.value.data.length) {
+          return pullData.value.data.map(pull => {
+            return {
+              id: pull.number,
+              repo: pull.base.repo.name,
+              url: pull.url,
+              data: pull,
+            }
+          });
         }
-      }));
+      }).filter(pulls => pulls).flat();
+
+      this.$store.commit('setCachedPulls', pullsFiltered);
 
       // Issues
       const issues = await Promise.allSettled(issuesPromises);
-      this.$store.commit('setCachedIssues', issues.map(issue => {
+      const issuesFiltered = issues.map(issue => {
         return {
           repo: issue.value.url.split(`${process.env.VUE_APP_ORGANISATION}/`)[1].split("/issues")[0],
           url: issue.value.url,
           data: issue.value.data,
         }
-      }));
+      });
+
+      this.$store.commit('setCachedIssues', issuesFiltered);
 
       this.loadingData = false;
 
