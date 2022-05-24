@@ -44,7 +44,56 @@
         font-weight: 400;
         line-height: 18px;
 
-        height: 40px;
+        height: 50px;
+
+        a {
+          color: #202020;
+        }
+      }
+    }
+
+    .author-container {
+      margin: 5px 0;
+
+      .author-login {
+        margin-left: 5px;
+      }
+    }
+
+    .assignees-container {
+      margin: 5px 0;
+
+      div {
+        margin: 5px 0;
+
+        .assignee-login {
+          margin-left: 5px;
+        }
+      }
+    }
+
+    .labels-container {
+      margin: 5px 0;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      .label {
+        margin: 5px 0;
+        padding: 0 7px;
+
+        border-width: 1px;
+        border-style: solid;
+        border-radius: 24px;
+
+        font-size: 12px;
+        font-weight: 600;
+        font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+        line-height: 18px;
+
+        text-align: center;
       }
     }
   }

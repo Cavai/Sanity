@@ -64,18 +64,12 @@ export default {
     authenticate() {
       if (!this.firebaseInitialized) {
         const firebaseConfig = {
-          // apiKey: 'AIzaSyDYfDWvYccsTTcasEkH6jkHoqqftOUJw90',
-          // authDomain: 'cavai-sanity.firebaseapp.com',
-          // projectId: 'cavai-sanity',
-          // storageBucket: 'cavai-sanity.appspot.com',
-          // messagingSenderId: '208882602019',
-          // appId: '1:208882602019:web:fcdce3c29dba7df7526196'
-          apiKey: 'AIzaSyB2UOShXzyfXlqNLgOYg_hltKyW1lOPdw8',
-          authDomain: 'cavai-stream.firebaseapp.com',
-          projectId: 'cavai-stream',
-          storageBucket: 'cavai-stream.appspot.com',
-          messagingSenderId: '158678105420',
-          appId: '1:158678105420:web:3d2c77a47fc46ff1a4e3e9'
+          apiKey: 'AIzaSyDYfDWvYccsTTcasEkH6jkHoqqftOUJw90',
+          authDomain: 'cavai-sanity.firebaseapp.com',
+          projectId: 'cavai-sanity',
+          storageBucket: 'cavai-sanity.appspot.com',
+          messagingSenderId: '208882602019',
+          appId: '1:208882602019:web:fcdce3c29dba7df7526196'
         };
 
         if (!firebase.apps.length) {
@@ -128,7 +122,7 @@ export default {
 
       octokit.rateLimit.get().then(({data}) => {
         console.log(
-          `%c ** REMAINING_RATE_LIMIT ${data.rate.remaining} **`,
+          `%c ** REMAINING RATE LIMIT ${data.rate.remaining} **`,
           'background: #0D47A1; color: #FFFFFF',
         );
 
@@ -143,6 +137,7 @@ export default {
       });
     },
     async preCacheData(octokit) {
+
       // Repositories
       const { data: repos } = await octokit.repos.listForOrg({
           org: process.env.VUE_APP_ORGANISATION,

@@ -64,30 +64,35 @@ export default {
           title: 'Name',
           slot: 'issue',
           sortable: true,
-          width: 500,
+          // width: 500,
         },
         {
           title: 'Commits',
           slot: 'commits',
+          width: 160,
         },
         {
           title: 'Last Commit',
           key: 'last_commit',
+          width: 160,
         },
         {
           title: 'Progress',
           slot: 'progress',
           sortable: 'custom',
+          width: 170,
         },
         {
           title: "Stage",
           slot: "stage",
           key: "stage",
           sortable: true,
+          width: 150,
         },
         {
           title: "Engineer(s)",
           slot: "engineers",
+          width: 150,
         }
       ],
       tableData: [],
