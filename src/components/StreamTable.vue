@@ -61,7 +61,10 @@ export default {
         author: pull.data.user,
         assignees: pull.data.assignees,
       }
+    }).filter(pull => {
+      return !pull.author.login.includes('dependabot');
     });
+
     const issuesData = this.$store.state.cachedIssues.map(issues => {
       return issues.data.map(issue => {
         return {
@@ -85,21 +88,47 @@ export default {
       columns: [
         {
             title: 'Title',
-            slot: 'title'
+            slot: 'title',
+            key: 'title',
+            sortable: true,
         },
         {
             title: 'Type',
             key: 'type',
+            sortable: true,
+            filters: [
+              {
+                label: "Issue",
+                value: "issue"
+              },
+              {
+                label: "Pull Request",
+                value: "pull request"
+              }
+            ],
+            filterMultiple: true,
+            filterMethod(value, row) {
+              return row.type.toLowerCase() === value;
+            },
             width: 120,
         },
         {
             title: 'Repository',
             key: 'repository',
+            sortable: true,
             width: 210,
         },
         {
             title: 'Last Activity',
             key: 'last_activity',
+            sortable: true,
+            sortMethod(a, b, type) {
+              if (type === "asc") {
+                return moment(a).unix() - moment(b).unix();
+              } else {
+                return moment(b).unix() - moment(a).unix();
+              }
+            },
             width: 160,
         },
         {
@@ -128,7 +157,6 @@ export default {
         backgroundColor: value,
         borderColor: value === "#ffffff" ? "gray" : "transparent",
         color: isDarkColor(value) || color === 'ff0ea7' ? "white" : "black",
-        // width: calculateWidth > 276 ? `276px` : calculateWidth < 40 ? `40px` : `${calculateWidth}px`,
       };
     },
     getLabelName(name) {

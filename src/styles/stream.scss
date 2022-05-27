@@ -73,15 +73,15 @@
     }
 
     .labels-container {
-      margin: 5px 0;
+      margin: 2.5px 0;
 
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
 
       .label {
-        margin: 5px 0;
+        margin: 2.5px 0;
         padding: 0 7px;
 
         border-width: 1px;

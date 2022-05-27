@@ -1,5 +1,5 @@
 .ivu-btn:hover {
-  border-color: unset!important;
+  border-color: transparent!important;
 }
 
 .ivu-btn:focus {
@@ -15,10 +15,36 @@
   box-shadow: 0 4px 12px rgb(0 0 0 / 7%);
 }
 
-.ivu-table-sort i.on {
+.ivu-table-sort i.on, i.ivu-icon-ios-funnel.on {
   color: #606060;
 }
 
 .ivu-table-cell-slot a {
   word-break: break-word;
+}
+
+.ivu-poptip-arrow {
+  border-bottom-color: #d9d9d9!important;
+}
+
+.ivu-table-filter-list {
+  color: #404040!important;
+  font-family: 'Noto Sans', sans-serif!important;
+  font-size: 13px!important;
+  font-weight: 300!important;
+
+  box-shadow: 0 4px 8px rgba(0,0,0,.16)!important;
+  border: 1px solid #d9d9d9!important;
+  border-radius: 2px!important;
+
+  .ivu-checkbox-focus {
+    box-shadow: unset!important;
+  }
+
+  button {
+    color: #0b8eba!important;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
 }

@@ -12,7 +12,7 @@
       </template>
       <!-- eslint-disable-next-line vue/no-unused-vars -->
       <template slot-scope="{ row }" slot="commits">
-        <span><SparkLine /></span>
+        <span><SparkLine :key="reRenderSparkLine" /></span>
       </template>
       <template slot-scope="{ row }" slot="progress">
         <span>{{ row.tasks_done }}/{{ row.tasks_done + row.tasks_not_done}}</span>
@@ -59,12 +59,12 @@ export default {
   data () {
     return {
       reRender: false,
+      reRenderSparkLine: false,
       requestsHeaders: [
         {
           title: 'Name',
           slot: 'issue',
           sortable: true,
-          // width: 500,
         },
         {
           title: 'Commits',
@@ -74,6 +74,7 @@ export default {
         {
           title: 'Last Commit',
           key: 'last_commit',
+          sortable: 'custom',
           width: 160,
         },
         {
@@ -137,7 +138,6 @@ export default {
       }
     },
     sortTable(options) {
-      console.log(options);
       if (options.column.title === 'Progress') {
         if (options.order === 'asc') {
           this.tableData.sort((a, b) => {
@@ -164,7 +164,25 @@ export default {
             return a.id - b.id;
           });
         }
+      } else if (options.column.title === 'Last Commit') {
+        if (options.order === 'asc') {
+          this.tableData.sort((a, b) => {
+            const timeA = moment(a.last_commit).unix();
+            const timeB = moment(b.last_commit).unix();
+
+            return (timeA ? timeA : 0) - (timeB ? timeB: 0);
+          });
+        } else if (options.order === 'desc') {
+          this.tableData.sort((a, b) => {
+            const timeA = moment(a.last_commit).unix();
+            const timeB = moment(b.last_commit).unix();
+
+            return (timeB ? timeB : 0) - (timeA ? timeA: 0);
+          });
+        }
       }
+
+      this.reRenderSparkLine = !this.reRenderSparkLine;
     }
   },
   watch: {
