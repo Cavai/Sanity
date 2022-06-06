@@ -2,7 +2,7 @@
   <div id="stream-table">
     <Table
       :columns="columns"
-      :data="data"
+      :data="rawData"
       :disabled-hover="true"
     >
       <template slot-scope="{ row }" slot="title">
@@ -47,42 +47,7 @@ const emojiDict = require("emoji-dictionary");
 
 export default {
   name: 'StreamTable',
-  mounted() {
-
-    const pullsData = this.$store.state.cachedPullRequests.map(pull => {
-      return {
-        id: pull.id,
-        title: pull.data.title,
-        url: pull.data.html_url,
-        type: 'Pull Request',
-        repository: pull.repo,
-        last_activity: moment(pull.data.updated_at).format('DD MMM YYYY'),
-        labels: pull.data.labels,
-        author: pull.data.user,
-        assignees: pull.data.assignees,
-      }
-    }).filter(pull => {
-      return !pull.author.login.includes('dependabot');
-    });
-
-    const issuesData = this.$store.state.cachedIssues.map(issues => {
-      return issues.data.map(issue => {
-        return {
-          id: issue.id,
-          title: issue.title,
-          url: issue.html_url,
-          type: 'Issue',
-          repository: issues.repo,
-          last_activity: moment(issue.updated_at).format('DD MMM YYYY'),
-          labels: issue.labels,
-          author: issue.user,
-          assignees: issue.assignees,
-        }
-      })
-    });
-
-    this.data = [...pullsData, ...issuesData.flat()];
-  },
+  props: ['rawData'],
   data () {
     return {
       columns: [
@@ -116,6 +81,18 @@ export default {
             title: 'Repository',
             key: 'repository',
             sortable: true,
+            filters: [...new Set(this.rawData.map(entry => entry.repository))]
+                      .sort((a, b) => a.localeCompare(b))
+                      .map(repository => {
+                        return {
+                          label: repository,
+                          value: repository,
+                        }
+            }),
+            filterMultiple: true,
+            filterMethod(value, row) {
+              return row.repository === value;
+            },
             width: 210,
         },
         {
@@ -134,19 +111,51 @@ export default {
         {
             title: 'Labels',
             slot: 'labels',
+            filters: [...new Set(this.rawData.map(entry => entry.labels)
+                      .flat()
+                      .map(label => label.name))]
+                      .sort((a, b) => a.localeCompare(b))
+                      .map(label => {
+                        return {
+                          label: this.getLabelName(label),
+                          value: label,
+                        }
+            }),
+            filterMultiple: true,
+            filterMethod(value, row) {
+              return row.labels.map(label => label.name).includes(value);
+            },
+            width: 240,
         },
         {
             title: 'Author',
             slot: 'author',
-            width: 150,
+            filters: [...new Set(this.rawData.map(entry => entry.author.login))]
+                      .sort((a, b) => a.localeCompare(b))
+                      .map(author => {
+                        return {
+                          label: author,
+                          value: author,
+                        }
+            }),
+            filterMultiple: true,
+            filterMethod(value, row) {
+              return row.author.login === value;
+            },
+            width: 165,
         },
         {
             title: 'Assignees',
             slot: 'assignees',
-            width: 150,
+            width: 165,
         },
       ],
       data: [],
+    }
+  },
+  computed: {
+    repos() {
+      return [...new Set(this.data.map(entry => entry.repository))];
     }
   },
   methods: {

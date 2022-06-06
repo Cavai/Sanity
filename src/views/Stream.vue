@@ -16,12 +16,14 @@
       <h2>Stream</h2>
     </div>
     <div class="requests-content">
-      <StreamTable />
+      <StreamTable :rawData="rawData" />
     </div>
   </div>
 </template>
 
 <script>
+import moment from 'moment';
+
 import Header from '@/components/Header.vue';
 import StreamTable from '@/components/StreamTable.vue';
 
@@ -32,12 +34,49 @@ export default {
     Header,
     StreamTable,
   },
+  created() {
+
+    const pullsData = this.$store.state.cachedPullRequests.map(pull => {
+      return {
+        id: pull.id,
+        title: pull.data.title,
+        url: pull.data.html_url,
+        type: 'Pull Request',
+        repository: pull.repo,
+        last_activity: moment(pull.data.updated_at).format('DD MMM YYYY'),
+        labels: pull.data.labels,
+        author: pull.data.user,
+        assignees: pull.data.assignees,
+      }
+    }).filter(pull => {
+      return !pull.author.login.includes('dependabot');
+    });
+
+    const issuesData = this.$store.state.cachedIssues.map(issues => {
+      return issues.data.map(issue => {
+        return {
+          id: issue.id,
+          title: issue.title,
+          url: issue.html_url,
+          type: 'Issue',
+          repository: issues.repo,
+          last_activity: moment(issue.updated_at).format('DD MMM YYYY'),
+          labels: issue.labels,
+          author: issue.user,
+          assignees: issue.assignees,
+        }
+      })
+    });
+
+    this.rawData = [...pullsData, ...issuesData.flat()];
+  },
   data() {
     return {
       error: {
         show: false,
         message: 'Service temporarily unavailable',
       },
+      rawData: [],
     }
   }
 }

@@ -88,6 +88,24 @@ export default {
           slot: "stage",
           key: "stage",
           sortable: true,
+          filters: [
+            {
+              label: "STAGE-1",
+              value: "STAGE-1"
+            },
+            {
+              label: "STAGE-2",
+              value: "STAGE-2"
+            },
+            {
+              label: "STAGE-3",
+              value: "STAGE-3"
+            },
+          ],
+          filterMultiple: true,
+          filterMethod(value, row) {
+            return row.stage === value;
+          },
           width: 150,
         },
         {

@@ -3,7 +3,6 @@
     <Spinner v-if="loadingData" />
     <div v-if="isNotOrganisationMember" class="error_container">
       <Alert type="error" show-icon>
-        <!-- TODO -->
         You're not recognized as {{ organisationName }} organisation member
         <span slot="desc">
           Please contact your line manager.
