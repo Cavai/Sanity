@@ -48,3 +48,32 @@
     text-transform: uppercase;
   }
 }
+
+.ivu-table-cell-tree {
+  float: left;
+  margin-right: 6px;
+  top: 2px;
+  position: relative;
+}
+
+.ivu-table-cell-tree:not(.ivu-table-cell-tree-empty){
+  &:hover {
+    color: #202020;
+    border-color: #202020;
+  }
+}
+
+.ivu-table-cell-tree-level {
+  float: left;
+}
+
+.ivu-table-cell-slot {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.ivu-checkbox-checked .ivu-checkbox-inner {
+  border-color: #0b8eba;
+  background-color: #0b8eba;
+}

@@ -53,7 +53,7 @@ export default {
               owner: "Cavai",
               repo: pull.repo,
               pull_number: pull.id,
-              per_page: 100
+              per_page: 50 // spark line based max on last 50 commits
             });
           });
 
@@ -72,6 +72,7 @@ export default {
         }
       });
 
+      // Request labels
       const labels = ['STAGE-1', 'STAGE-2', 'STAGE-3'];
 
       const requestsData = this.$store.state.cachedIssues.find(repo => repo.repo === 'Requests');
@@ -79,10 +80,11 @@ export default {
 
       this.rawData = requestsDataFiltered.map(request => {
         const matchedPRs = aggregator.filter(pr => pr.data.title.includes(request.title.split(']')[0]));
+
         return {
           ...request,
-          pulls: matchedPRs.map(pr => pr.data),
-          commits: matchedPRs.map(pr => pr.commits),
+          pulls: matchedPRs.map(pr => ({...pr.data, commits: pr.commits})),
+          commits: matchedPRs.map(pr => pr.commits).flat(),
         }
       });
     }

@@ -154,6 +154,15 @@ export default {
         });
       });
 
+      const closedPullsPromises = repos.map(repo => {
+        return octokit.pulls.list({
+          owner: process.env.VUE_APP_ORGANISATION,
+          repo: repo.name,
+          state: "closed",
+          per_page: 100
+        });
+      });
+
       const issuesPromises = repos.map(repo => {
         return octokit.issues.listForRepo({
           owner: process.env.VUE_APP_ORGANISATION,
@@ -164,8 +173,9 @@ export default {
 
       // PRs
       const pulls = await Promise.allSettled(pullsPromises);
+      const closedPulls = await Promise.allSettled(closedPullsPromises);
 
-      const pullsFiltered = pulls.map(pullData => {
+      const pullsFiltered = [...pulls, ...closedPulls].map(pullData => {
         if (pullData.value.data.length) {
           return pullData.value.data.map(pull => {
             return {
@@ -176,7 +186,9 @@ export default {
             }
           });
         }
-      }).filter(pulls => pulls).flat();
+      }).filter(pulls => pulls).flat().filter(pull => {
+        return pull.data.state === 'open' || pull.data.title.includes('RFC');
+      });
 
       this.$store.commit('setCachedPulls', pullsFiltered);
 

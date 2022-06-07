@@ -2,24 +2,27 @@
   <div id="requests-table">
     <Table
       :key="reRender"
+      row-key="id"
       :columns="requestsHeaders"
       :data="tableData"
       :disabled-hover="true"
       @on-sort-change="sortTable"
     >
       <template slot-scope="{ row }" slot="issue">
+        <span v-if="row.pull" class="issue-icon"><Icon type="md-git-pull-request" /></span>
+        <span v-if="row.commit" class="issue-icon"><Icon type="md-git-commit" /></span>
         <a :href="row.url" target="_blank">{{ row.issue }}</a>
       </template>
       <!-- eslint-disable-next-line vue/no-unused-vars -->
       <template slot-scope="{ row }" slot="commits">
-        <span><SparkLine :key="reRenderSparkLine" /></span>
+        <span v-if="row.commits !== null"><SparkLine :commits="row.commits" :key="reRenderSparkLine" /></span>
       </template>
       <template slot-scope="{ row }" slot="progress">
-        <span>{{ row.tasks_done }}/{{ row.tasks_done + row.tasks_not_done}}</span>
-        <strong>&nbsp;({{ calculatePercent(row.tasks_done, row.tasks_not_done).toFixed(2) }} %)</strong>
+        <span v-if="row.tasks_done !== null">{{ row.tasks_done }}/{{ row.tasks_done + row.tasks_not_done}}</span>
+        <strong v-if="row.tasks_done !== null">&nbsp;({{ calculatePercent(row.tasks_done, row.tasks_not_done).toFixed(2) }} %)</strong>
       </template>
       <template slot-scope="{ row }" slot="stage">
-        <div class="labels-container">
+        <div class="labels-container" v-if="row.stage !== null">
           <div
             class="label"
             :style="generateLabelStyles(row.stage, getStageLabelColor(row.stage))"
@@ -29,7 +32,7 @@
         </div>
       </template>
       <template slot-scope="{ row }" slot="engineers">
-        <div class="engineers-container">
+        <div class="engineers-container" v-if="row.engineers !== null">
           <div v-for="engineer in row.engineers" :key="engineer.login">
             <Avatar :src="engineer.avatar_url" size="small" />
             <span class="engineer-login">{{ engineer.login }}</span>
@@ -43,6 +46,7 @@
 <script>
 import isDarkColor from 'is-dark-color';
 import moment from 'moment';
+import { v4 as uuidv4 } from "uuid";
 
 import SparkLine from '@/components/SparkLine.vue';
 
@@ -65,6 +69,8 @@ export default {
           title: 'Name',
           slot: 'issue',
           sortable: true,
+          tree: true,
+          minWidth: 200,
         },
         {
           title: 'Commits',
@@ -217,12 +223,35 @@ export default {
           id: request.id,
           issue: request.title,
           url: request.html_url,
-          commits: '-*-*-',
+          commits,
           last_commit: commits ? moment(commits[0]).format('DD MMM YYYY') : '-',
           tasks_done: tasksDone,
           tasks_not_done: tasksNotDone,
           stage: request.labels.find(label => label.name.includes('STAGE')).name,
           engineers: request.assignees,
+          children: request.pulls.length ? request.pulls.filter(pull => pull.state === 'open').map(pull => ({
+              id: uuidv4(),
+              issue: pull.title,
+              url: pull.html_url,
+              commits: null,
+              last_commit: null,
+              tasks_done: null,
+              stage: null,
+              engineers: null,
+              pull: true,
+              children: pull.commits.length ? pull.commits.map(commit => ({
+                id: uuidv4(),
+                issue: commit.commit.message,
+                url: commit.html_url,
+                commits: null,
+                last_commit: null,
+                tasks_done: null,
+                stage: null,
+                engineers: null,
+                commit: true,
+              })) : [],
+            }))
+          : [],
         }
       })];
 
