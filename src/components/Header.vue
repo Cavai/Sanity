@@ -14,28 +14,30 @@
         <span>EXPORT <Icon size="12" type="md-download" /></span>
       </div>
       <div v-if="$store.state.user" class="header-user">
-        <span @click="logout">{{ $store.state.user.display }} <Icon size="12" type="md-exit" /></span>
+        <span @click="logout"
+          >{{ $store.state.user.display }} <Icon size="12" type="md-exit"
+        /></span>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import notifications from '@/mixins/notifications';
+import notifications from "@/mixins/notifications";
 
-import Logo from '@/components/Logo.vue';
+import Logo from "@/components/Logo.vue";
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
-  name: 'Header',
+  name: "Header",
   components: {
     Logo,
   },
   mixins: [notifications],
   computed: {
     exportAvailable() {
-      return this.$route.name !== 'Utils';
-    }
+      return this.$route.name !== "Utils";
+    },
   },
   methods: {
     logout() {
@@ -49,7 +51,7 @@ export default {
             this.notificationSuccess("You have been logged out successfully.");
             this.$router.push("/");
           })
-          .catch(error => {
+          .catch((error) => {
             this.notificationError(error);
           });
 
@@ -59,7 +61,7 @@ export default {
       this.$store.commit("logoutUser");
       this.notificationSuccess("You have been logged out successfully.");
       this.$router.push("/");
-    }
-  }
-}
+    },
+  },
+};
 </script>

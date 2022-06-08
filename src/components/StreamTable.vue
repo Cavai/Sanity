@@ -1,10 +1,6 @@
 <template>
   <div id="stream-table">
-    <Table
-      :columns="columns"
-      :data="rawData"
-      :disabled-hover="true"
-    >
+    <Table :columns="columns" :data="rawData" :disabled-hover="true">
       <template slot-scope="{ row }" slot="title">
         <a :href="row.url" target="_blank">{{ row.title }}</a>
       </template>
@@ -40,145 +36,157 @@
 
 <script>
 /* eslint-disable no-unused-vars */
-import isDarkColor from 'is-dark-color';
-import moment from 'moment';
+import isDarkColor from "is-dark-color";
+import moment from "moment";
 
 const emojiDict = require("emoji-dictionary");
 
 export default {
-  name: 'StreamTable',
-  props: ['rawData'],
-  data () {
+  name: "StreamTable",
+  props: ["rawData"],
+  data() {
     return {
       columns: [
         {
-            title: 'Title',
-            slot: 'title',
-            key: 'title',
-            sortable: true,
+          title: "Title",
+          slot: "title",
+          key: "title",
+          sortable: true,
         },
         {
-            title: 'Type',
-            key: 'type',
-            sortable: true,
-            filters: [
-              {
-                label: "Issue",
-                value: "issue"
-              },
-              {
-                label: "Pull Request",
-                value: "pull request"
-              }
-            ],
-            filterMultiple: true,
-            filterMethod(value, row) {
-              return row.type.toLowerCase() === value;
+          title: "Type",
+          key: "type",
+          sortable: true,
+          filters: [
+            {
+              label: "Issue",
+              value: "issue",
             },
-            width: 120,
-        },
-        {
-            title: 'Repository',
-            key: 'repository',
-            sortable: true,
-            filters: [...new Set(this.rawData.map(entry => entry.repository))]
-                      .sort((a, b) => a.localeCompare(b))
-                      .map(repository => {
-                        return {
-                          label: repository,
-                          value: repository,
-                        }
-            }),
-            filterMultiple: true,
-            filterMethod(value, row) {
-              return row.repository === value;
+            {
+              label: "Pull Request",
+              value: "pull request",
             },
-            width: 210,
-        },
-        {
-            title: 'Last Activity',
-            key: 'last_activity',
-            sortable: true,
-            sortMethod(a, b, type) {
-              if (type === "asc") {
-                return moment(a).unix() - moment(b).unix();
-              } else {
-                return moment(b).unix() - moment(a).unix();
-              }
-            },
-            width: 160,
-        },
-        {
-            title: 'Labels',
-            slot: 'labels',
-            filters: [...new Set(this.rawData.map(entry => entry.labels)
-                      .flat()
-                      .map(label => label.name))]
-                      .sort((a, b) => a.localeCompare(b))
-                      .map(label => {
-                        return {
-                          label: this.getLabelName(label),
-                          value: label,
-                        }
-            }),
-            filterMultiple: true,
-            filterMethod(value, row) {
-              return row.labels.map(label => label.name).includes(value);
-            },
-            width: 240,
-        },
-        {
-            title: 'Author',
-            slot: 'author',
-            filters: [...new Set(this.rawData.map(entry => entry.author.login))]
-                      .sort((a, b) => a.localeCompare(b))
-                      .map(author => {
-                        return {
-                          label: author,
-                          value: author,
-                        }
-            }),
-            filterMultiple: true,
-            filterMethod(value, row) {
-              return row.author.login === value;
-            },
-            width: 165,
-        },
-        {
-            title: 'Assignees',
-            slot: 'assignees',
-            filters: [...new Set(this.rawData.map(pull => pull.assignees.map(assignee => assignee.login))
-                    .flat()
-                    .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())))]
-                    .map(assignee => {
-                      return {
-                        label: assignee,
-                        value: assignee,
-                      }
-                    }),
+          ],
           filterMultiple: true,
           filterMethod(value, row) {
-            return row.assignees.map(assignee => assignee.login).includes(value);
+            return row.type.toLowerCase() === value;
           },
-            width: 165,
+          width: 120,
+        },
+        {
+          title: "Repository",
+          key: "repository",
+          sortable: true,
+          filters: [...new Set(this.rawData.map((entry) => entry.repository))]
+            .sort((a, b) => a.localeCompare(b))
+            .map((repository) => {
+              return {
+                label: repository,
+                value: repository,
+              };
+            }),
+          filterMultiple: true,
+          filterMethod(value, row) {
+            return row.repository === value;
+          },
+          width: 210,
+        },
+        {
+          title: "Last Activity",
+          key: "last_activity",
+          sortable: true,
+          sortMethod(a, b, type) {
+            if (type === "asc") {
+              return moment(a).unix() - moment(b).unix();
+            } else {
+              return moment(b).unix() - moment(a).unix();
+            }
+          },
+          width: 160,
+        },
+        {
+          title: "Labels",
+          slot: "labels",
+          filters: [
+            ...new Set(
+              this.rawData
+                .map((entry) => entry.labels)
+                .flat()
+                .map((label) => label.name)
+            ),
+          ]
+            .sort((a, b) => a.localeCompare(b))
+            .map((label) => {
+              return {
+                label: this.getLabelName(label),
+                value: label,
+              };
+            }),
+          filterMultiple: true,
+          filterMethod(value, row) {
+            return row.labels.map((label) => label.name).includes(value);
+          },
+          width: 240,
+        },
+        {
+          title: "Author",
+          slot: "author",
+          filters: [...new Set(this.rawData.map((entry) => entry.author.login))]
+            .sort((a, b) => a.localeCompare(b))
+            .map((author) => {
+              return {
+                label: author,
+                value: author,
+              };
+            }),
+          filterMultiple: true,
+          filterMethod(value, row) {
+            return row.author.login === value;
+          },
+          width: 165,
+        },
+        {
+          title: "Assignees",
+          slot: "assignees",
+          filters: [
+            ...new Set(
+              this.rawData
+                .map((pull) => pull.assignees.map((assignee) => assignee.login))
+                .flat()
+                .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+            ),
+          ].map((assignee) => {
+            return {
+              label: assignee,
+              value: assignee,
+            };
+          }),
+          filterMultiple: true,
+          filterMethod(value, row) {
+            return row.assignees
+              .map((assignee) => assignee.login)
+              .includes(value);
+          },
+          width: 165,
         },
       ],
       data: [],
-    }
+    };
   },
   computed: {
     repos() {
-      return [...new Set(this.data.map(entry => entry.repository))];
-    }
+      return [...new Set(this.data.map((entry) => entry.repository))];
+    },
   },
   methods: {
     generateLabelStyles(name, color) {
       const value = `#${color}`;
-      const calculateWidth = name.length > 20 ? name.length * 8 : name.length * 12;
+      const calculateWidth =
+        name.length > 20 ? name.length * 8 : name.length * 12;
       return {
         backgroundColor: value,
         borderColor: value === "#ffffff" ? "gray" : "transparent",
-        color: isDarkColor(value) || color === 'ff0ea7' ? "white" : "black",
+        color: isDarkColor(value) || color === "ff0ea7" ? "white" : "black",
       };
     },
     getLabelName(name) {
@@ -188,19 +196,20 @@ export default {
       if (emojis.length) {
         let newName = name;
 
-        emojis.forEach(emoji => {
-          newName = newName.replaceAll(emoji[0], emojiDict.getUnicode(emoji[0].split(":")[1]));
+        emojis.forEach((emoji) => {
+          newName = newName.replaceAll(
+            emoji[0],
+            emojiDict.getUnicode(emoji[0].split(":")[1])
+          );
         });
 
         return newName;
       }
 
       return name;
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
-<style>
-
-</style>
+<style></style>

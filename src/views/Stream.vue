@@ -1,16 +1,9 @@
 <template>
   <div id="stream">
     <Spinner v-if="!rawData.length" />
-    <Alert
-      v-if="error.show"
-      type="error"
-      show-icon
-      class="error_container"
-    >
+    <Alert v-if="error.show" type="error" show-icon class="error_container">
       {{ error.message }}
-      <span slot="desc">
-        Please try again in a few minutes.
-      </span>
+      <span slot="desc"> Please try again in a few minutes. </span>
     </Alert>
     <Header />
     <div class="sub-header">
@@ -23,52 +16,53 @@
 </template>
 
 <script>
-import moment from 'moment';
+import moment from "moment";
 
-import Header from '@/components/Header.vue';
-import Spinner from '@/components/Spinner.vue';
-import StreamTable from '@/components/StreamTable.vue';
+import Header from "@/components/Header.vue";
+import Spinner from "@/components/Spinner.vue";
+import StreamTable from "@/components/StreamTable.vue";
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
-  name: 'Stream',
+  name: "Stream",
   components: {
     Header,
     Spinner,
     StreamTable,
   },
   created() {
+    const pullsData = this.$store.state.cachedPullRequests
+      .map((pull) => {
+        return {
+          id: pull.id,
+          title: pull.data.title,
+          url: pull.data.html_url,
+          type: "Pull Request",
+          repository: pull.repo,
+          last_activity: moment(pull.data.updated_at).format("DD MMM YYYY"),
+          labels: pull.data.labels,
+          author: pull.data.user,
+          assignees: pull.data.assignees,
+        };
+      })
+      .filter((pull) => {
+        return !pull.author.login.includes("dependabot");
+      });
 
-    const pullsData = this.$store.state.cachedPullRequests.map(pull => {
-      return {
-        id: pull.id,
-        title: pull.data.title,
-        url: pull.data.html_url,
-        type: 'Pull Request',
-        repository: pull.repo,
-        last_activity: moment(pull.data.updated_at).format('DD MMM YYYY'),
-        labels: pull.data.labels,
-        author: pull.data.user,
-        assignees: pull.data.assignees,
-      }
-    }).filter(pull => {
-      return !pull.author.login.includes('dependabot');
-    });
-
-    const issuesData = this.$store.state.cachedIssues.map(issues => {
-      return issues.data.map(issue => {
+    const issuesData = this.$store.state.cachedIssues.map((issues) => {
+      return issues.data.map((issue) => {
         return {
           id: issue.id,
           title: issue.title,
           url: issue.html_url,
-          type: 'Issue',
+          type: "Issue",
           repository: issues.repo,
-          last_activity: moment(issue.updated_at).format('DD MMM YYYY'),
+          last_activity: moment(issue.updated_at).format("DD MMM YYYY"),
           labels: issue.labels,
           author: issue.user,
           assignees: issue.assignees,
-        }
-      })
+        };
+      });
     });
 
     this.rawData = [...pullsData, ...issuesData.flat()];
@@ -77,14 +71,12 @@ export default {
     return {
       error: {
         show: false,
-        message: 'Service temporarily unavailable',
+        message: "Service temporarily unavailable",
       },
       rawData: [],
-    }
-  }
-}
+    };
+  },
+};
 </script>
 
-<style>
-
-</style>
+<style></style>

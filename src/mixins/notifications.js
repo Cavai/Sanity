@@ -3,16 +3,16 @@ const notifications = {
     notificationSuccess(desc) {
       this.$Notice.success({
         title: "Success",
-        desc
+        desc,
       });
     },
     notificationError(desc) {
       this.$Notice.error({
         title: "Error",
-        desc
+        desc,
       });
     },
-  }
+  },
 };
 
 export default notifications;

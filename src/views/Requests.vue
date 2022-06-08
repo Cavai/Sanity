@@ -1,16 +1,9 @@
 <template>
   <div id="requests">
     <Spinner v-if="!rawData.length" />
-    <Alert
-      v-if="error.show"
-      type="error"
-      show-icon
-      class="error_container"
-    >
+    <Alert v-if="error.show" type="error" show-icon class="error_container">
       {{ error.message }}
-      <span slot="desc">
-        Please try again in a few minutes.
-      </span>
+      <span slot="desc"> Please try again in a few minutes. </span>
     </Alert>
     <Header />
     <div class="sub-header">
@@ -23,15 +16,15 @@
 </template>
 
 <script>
-import octokit from '@/mixins/octokit';
+import octokit from "@/mixins/octokit";
 
-import Header from '@/components/Header.vue';
-import RequestsTable from '@/components/RequestsTable.vue';
-import Spinner from '@/components/Spinner.vue';
+import Header from "@/components/Header.vue";
+import RequestsTable from "@/components/RequestsTable.vue";
+import Spinner from "@/components/Spinner.vue";
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
-  name: 'Requests',
+  name: "Requests",
   components: {
     Header,
     RequestsTable,
@@ -42,56 +35,69 @@ export default {
     return {
       error: {
         show: false,
-        message: 'Service temporarily unavailable',
+        message: "Service temporarily unavailable",
       },
       rawData: [],
       additionalData: [],
-    }
+    };
   },
   methods: {
     async prepareCommits() {
-      if (!sessionStorage.getItem('cachedCommits')) {
-        const commitsPromises = this.$store.state.cachedPullRequests.filter(pull => pull.data.title.includes('RFC')).map(pull => {
-            console.log(pull.data.title);
+      if (!sessionStorage.getItem("cachedCommits")) {
+        const commitsPromises = this.$store.state.cachedPullRequests
+          .filter((pull) => pull.data.title.includes("RFC"))
+          .map((pull) => {
             return this.octokit.pulls.listCommits({
               owner: process.env.VUE_APP_ORGANISATION,
               repo: pull.repo,
               pull_number: pull.id,
-              per_page: 50 // Verify is 50 enough
+              per_page: 50, // Verify is 50 enough
             });
           });
 
-          const commits = await Promise.allSettled(commitsPromises);
-          sessionStorage.setItem('cachedCommits', JSON.stringify(commits.map(commit => commit.value.data)));
+        const commits = await Promise.allSettled(commitsPromises);
+        sessionStorage.setItem(
+          "cachedCommits",
+          JSON.stringify(commits.map((commit) => commit.value.data))
+        );
       }
 
-      return JSON.parse(sessionStorage.getItem('cachedCommits'));
+      return JSON.parse(sessionStorage.getItem("cachedCommits"));
     },
     async getInitialData() {
       const commits = await this.prepareCommits();
-      const aggregator = this.$store.state.cachedPullRequests.filter(pull => pull.data.title.includes('RFC')).map((pull, index) => {
-        return {
-          ...pull,
-          commits: commits[index]
-        }
-      });
+      const aggregator = this.$store.state.cachedPullRequests
+        .filter((pull) => pull.data.title.includes("RFC"))
+        .map((pull, index) => {
+          return {
+            ...pull,
+            commits: commits[index],
+          };
+        });
 
       // Request labels
-      const labels = ['STAGE-1', 'STAGE-2', 'STAGE-3'];
+      const labels = ["STAGE-1", "STAGE-2", "STAGE-3"];
 
-      const requestsData = this.$store.state.cachedIssues.find(repo => repo.repo === 'Requests');
-      const requestsDataFiltered = requestsData.data.filter(issue => issue.labels.filter(label => labels.includes(label.name)).length);
+      const requestsData = this.$store.state.cachedIssues.find(
+        (repo) => repo.repo === "Requests"
+      );
+      const requestsDataFiltered = requestsData.data.filter(
+        (issue) =>
+          issue.labels.filter((label) => labels.includes(label.name)).length
+      );
 
-      this.rawData = requestsDataFiltered.map(request => {
-        const matchedPRs = aggregator.filter(pr => pr.data.title.includes(request.title.split(']')[0]));
+      this.rawData = requestsDataFiltered.map((request) => {
+        const matchedPRs = aggregator.filter((pr) =>
+          pr.data.title.includes(request.title.split("]")[0])
+        );
 
         return {
           ...request,
-          pulls: matchedPRs.map(pr => ({...pr.data, commits: pr.commits})),
-          commits: matchedPRs.map(pr => pr.commits).flat(),
-        }
+          pulls: matchedPRs.map((pr) => ({ ...pr.data, commits: pr.commits })),
+          commits: matchedPRs.map((pr) => pr.commits).flat(),
+        };
       });
-    }
-  }
-}
+    },
+  },
+};
 </script>

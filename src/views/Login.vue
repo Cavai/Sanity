@@ -4,9 +4,7 @@
     <div v-if="isNotOrganisationMember" class="error_container">
       <Alert type="error" show-icon>
         You're not recognized as {{ organisationName }} organisation member
-        <span slot="desc">
-          Please contact your line manager.
-        </span>
+        <span slot="desc"> Please contact your line manager. </span>
       </Alert>
     </div>
     <div class="sign_in_container">
@@ -16,11 +14,7 @@
       <div class="sign_in_right">
         <div class="sign_in_right_card">
           <Logo />
-          <Button
-            size="large"
-            class="sign_in_button"
-            @click="authenticate"
-          >
+          <Button size="large" class="sign_in_button" @click="authenticate">
             <Icon size="22" type="logo-github" />
             <span>&nbsp;Sign In with GitHub</span>
           </Button>
@@ -31,15 +25,15 @@
 </template>
 
 <script>
-import Logo from '@/components/Logo.vue';
-import Spinner from '@/components/Spinner.vue';
+import Logo from "@/components/Logo.vue";
+import Spinner from "@/components/Spinner.vue";
 
-import { Octokit } from '@octokit/rest';
-import firebase from 'firebase';
+import { Octokit } from "@octokit/rest";
+import firebase from "firebase";
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
-  name: 'Login',
+  name: "Login",
   components: {
     Logo,
     Spinner,
@@ -50,23 +44,23 @@ export default {
       firebaseInitialized: false,
       firebaseInstance: null,
       isNotOrganisationMember: false,
-    }
+    };
   },
   computed: {
     organisationName() {
       return process.env.VUE_APP_ORGANISATION;
-    }
+    },
   },
   methods: {
     authenticate() {
       if (!this.firebaseInitialized) {
         const firebaseConfig = {
-          apiKey: 'AIzaSyDYfDWvYccsTTcasEkH6jkHoqqftOUJw90',
-          authDomain: 'cavai-sanity.firebaseapp.com',
-          projectId: 'cavai-sanity',
-          storageBucket: 'cavai-sanity.appspot.com',
-          messagingSenderId: '208882602019',
-          appId: '1:208882602019:web:fcdce3c29dba7df7526196'
+          apiKey: process.env.VUE_APP_FIREBASE_API_KEY,
+          authDomain: process.env.VUE_APP_FIREBASE_AUTH_DOMAIN,
+          projectId: process.env.VUE_APP_FIREBASE_PROJECT_ID,
+          storageBucket: process.env.VUE_APP_STORAGE_BUCKET,
+          messagingSenderId: process.env.VUE_APP_MESSAGING_SENDER_ID,
+          appId: process.env.VUE_APP_APP_ID,
         };
 
         if (!firebase.apps.length) {
@@ -79,93 +73,105 @@ export default {
       }
 
       const provider = new firebase.auth.GithubAuthProvider();
-      provider.addScope('user');
+      provider.addScope("user");
 
       firebase
         .auth()
         .signInWithPopup(provider)
-        .then(result => {
+        .then((result) => {
           this.loadingData = true;
 
           const octokit = new Octokit({
             auth: result.credential.accessToken,
-            userAgent: 'Cavai Sanity v0.1',
+            userAgent: "Cavai Sanity v0.1",
           });
 
-          octokit.orgs.getMembershipForUser({
-            org: 'Cavai',
-            username: result.additionalUserInfo.username,
-          }).then(() => {
+          octokit.orgs
+            .getMembershipForUser({
+              org: "Cavai",
+              username: result.additionalUserInfo.username,
+            })
+            .then(() => {
+              this.isNotOrganisationMember = false;
 
-            this.isNotOrganisationMember = false;
+              this.$store.commit("authenticateUser", {
+                login: result.additionalUserInfo.username,
+                display: result.user.displayName,
+              });
+              this.$store.commit("setFirebaseInstance", this.firebaseInstance);
+              this.$store.commit("setExpiryDate");
 
-            this.$store.commit('authenticateUser', { login: result.additionalUserInfo.username, display: result.user.displayName });
-            this.$store.commit('setFirebaseInstance', this.firebaseInstance);
-            this.$store.commit('setExpiryDate');
-
-            this.prepareToken();
-          }).catch(error => {
-            console.error('User membership error: ', error.message);
-            this.loadingData = false;
-            this.isNotOrganisationMember = true;
-          })
-        })
+              this.prepareToken();
+            })
+            .catch((error) => {
+              console.error("User membership error: ", error.message);
+              this.loadingData = false;
+              this.isNotOrganisationMember = true;
+            });
+        });
     },
     prepareToken() {
       const octokit = new Octokit({
         auth: process.env.VUE_APP_GH_TOKEN,
-        userAgent: 'Cavai Sanity v0.1'
+        userAgent: "Cavai Sanity v0.1",
       });
 
-      octokit.rateLimit.get().then(({data}) => {
+      octokit.rateLimit.get().then(({ data }) => {
         console.log(
           `%c ** REMAINING RATE LIMIT ${data.rate.remaining} **`,
-          'background: #0D47A1; color: #FFFFFF',
+          "background: #0D47A1; color: #FFFFFF"
         );
 
         if (data.rate.remaining >= 1500) {
           // Main token
-          this.$store.commit('setToken', process.env.VUE_APP_GH_TOKEN);
+          this.$store.commit("setToken", process.env.VUE_APP_GH_TOKEN);
         } else {
           // Alternative token (TODO: update logic)
-          this.$store.commit('setToken', process.env.VUE_APP_GH_TOKEN_ALT);
+          this.$store.commit("setToken", process.env.VUE_APP_GH_TOKEN_ALT);
         }
         this.preCacheData(octokit);
       });
     },
     async preCacheData(octokit) {
+      // Users
+      const { data: users } = await octokit.orgs.listMembers({
+        org: process.env.VUE_APP_ORGANISATION,
+        per_page: 100,
+      });
+
+      this.$store.commit("setCachedUsers", users);
 
       // Repositories
       const { data: repos } = await octokit.repos.listForOrg({
-          org: process.env.VUE_APP_ORGANISATION,
-          per_page: 100
-        });
+        org: process.env.VUE_APP_ORGANISATION,
+        per_page: 100,
+      });
 
-      // this.$store.commit('setCachedRepositories', repos);
+      this.$store.commit('setCachedRepositories', repos);
 
-      const pullsPromises = repos.map(repo => {
+      const pullsPromises = repos.map((repo) => {
         return octokit.pulls.list({
           owner: process.env.VUE_APP_ORGANISATION,
           repo: repo.name,
           state: "open",
-          per_page: 100
+          per_page: 100,
         });
       });
 
-      const closedPullsPromises = repos.map(repo => {
+      const closedPullsPromises = repos.map((repo) => {
         return octokit.pulls.list({
           owner: process.env.VUE_APP_ORGANISATION,
           repo: repo.name,
           state: "closed",
-          per_page: 100
+          per_page: 100,
         });
       });
 
-      const issuesPromises = repos.map(repo => {
+      const issuesPromises = repos.map((repo) => {
         return octokit.issues.listForRepo({
           owner: process.env.VUE_APP_ORGANISATION,
           repo: repo.name,
-          per_page: 100
+          per_page: 100,
         });
       });
 
@@ -173,34 +179,40 @@ export default {
       const pulls = await Promise.allSettled(pullsPromises);
       const closedPulls = await Promise.allSettled(closedPullsPromises);
 
-      const pullsFiltered = [...pulls, ...closedPulls].map(pullData => {
-        if (pullData.value.data.length) {
-          return pullData.value.data.map(pull => {
-            return {
-              id: pull.number,
-              repo: pull.base.repo.name,
-              url: pull.url,
-              data: pull,
-            }
-          });
-        }
-      }).filter(pulls => pulls).flat().filter(pull => {
-        return pull.data.state === 'open' || pull.data.title.includes('RFC');
-      });
+      const pullsFiltered = [...pulls, ...closedPulls]
+        .map((pullData) => {
+          if (pullData.value.data.length) {
+            return pullData.value.data.map((pull) => {
+              return {
+                id: pull.number,
+                repo: pull.base.repo.name,
+                url: pull.url,
+                data: pull,
+              };
+            });
+          }
+        })
+        .filter((pulls) => pulls)
+        .flat()
+        .filter((pull) => {
+          return pull.data.state === "open" || pull.data.title.includes("RFC");
+        });
 
-      this.$store.commit('setCachedPulls', pullsFiltered);
+      this.$store.commit("setCachedPulls", pullsFiltered);
 
       // Issues
       const issues = await Promise.allSettled(issuesPromises);
-      const issuesFiltered = issues.map(issue => {
+      const issuesFiltered = issues.map((issue) => {
         return {
-          repo: issue.value.url.split(`${process.env.VUE_APP_ORGANISATION}/`)[1].split("/issues")[0],
+          repo: issue.value.url
+            .split(`${process.env.VUE_APP_ORGANISATION}/`)[1]
+            .split("/issues")[0],
           url: issue.value.url,
           data: issue.value.data,
-        }
+        };
       });
 
-      this.$store.commit('setCachedIssues', issuesFiltered);
+      this.$store.commit("setCachedIssues", issuesFiltered);
 
       this.loadingData = false;
 
@@ -209,7 +221,7 @@ export default {
       } else {
         this.$router.push("/requests");
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>

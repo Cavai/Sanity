@@ -1,5 +1,4 @@
 #horizon {
-
   .sub-header {
     height: 45px;
 
@@ -17,6 +16,60 @@
     }
   }
 
+  .sub-menu {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: row;
+
+    margin: 25px 30px;
+
+    background: #ffffff;
+    padding-top: 25px;
+    padding-left: 25px;
+
+    border-radius: 2.5px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 7%);
+
+    .ivu-form-item-label {
+      color: #afafaf;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      background: #ffffff;
+    }
+
+    .sub-menu-engineer, .sub-menu-date-picker {
+      width: 250px;
+    }
+
+    .sub-menu-repository {
+      width: 300px;
+    }
+
+    .sub-menu-search {
+      background: #0588bf;
+      color: #ffffff;
+      width: 150px;
+
+      font-style: normal;
+      font-weight: 300;
+      font-size: 13px;
+      line-height: 18px;
+      font-weight: 600;
+      line-height: 15px;
+      padding-left: 15px;
+      padding-right: 15px;
+      background-image: linear-gradient(180deg,#0c9fcc 50.52%,#0b8eba);
+      border-radius: 4px;
+      transition: box-shadow .16s ease-in-out;
+      border: none;
+      z-index: 1;
+      position: relative;
+    }
+  }
+
   #horizon-table {
     margin: 30px 30px;
 
@@ -28,14 +81,14 @@
       th {
         height: 50px;
 
-        color: #AFAFAF;
+        color: #afafaf;
         font-size: 11px;
         font-weight: 600;
-        letter-spacing: .03em;
+        letter-spacing: 0.03em;
         text-transform: uppercase;
 
-        background: #FFFFFF;
-        border-bottom: 2px solid #DFDFDF;
+        background: #ffffff;
+        border-bottom: 2px solid #dfdfdf;
       }
 
       td {
@@ -48,5 +101,4 @@
       }
     }
   }
-
 }

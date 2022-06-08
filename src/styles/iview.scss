@@ -1,5 +1,5 @@
 .ivu-btn:hover {
-  border-color: transparent!important;
+  border-color: transparent !important;
 }
 
 .ivu-btn:focus {
@@ -15,7 +15,8 @@
   box-shadow: 0 4px 12px rgb(0 0 0 / 7%);
 }
 
-.ivu-table-sort i.on, i.ivu-icon-ios-funnel.on {
+.ivu-table-sort i.on,
+i.ivu-icon-ios-funnel.on {
   color: #606060;
 }
 
@@ -24,29 +25,29 @@
 }
 
 .ivu-poptip-arrow {
-  border-bottom-color: #d9d9d9!important;
+  border-bottom-color: #d9d9d9 !important;
 }
 
 .ivu-tooltip-inner {
-  font-family: 'Noto Sans', sans-serif!important;
+  font-family: "Noto Sans", sans-serif !important;
 }
 
 .ivu-table-filter-list {
-  color: #404040!important;
-  font-family: 'Noto Sans', sans-serif!important;
-  font-size: 13px!important;
-  font-weight: 300!important;
+  color: #404040 !important;
+  font-family: "Noto Sans", sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 300 !important;
 
-  box-shadow: 0 4px 8px rgba(0,0,0,.16)!important;
-  border: 1px solid #d9d9d9!important;
-  border-radius: 2px!important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.16) !important;
+  border: 1px solid #d9d9d9 !important;
+  border-radius: 2px !important;
 
   .ivu-checkbox-focus {
-    box-shadow: unset!important;
+    box-shadow: unset !important;
   }
 
   button {
-    color: #0b8eba!important;
+    color: #0b8eba !important;
     font-size: 13px;
     font-weight: 600;
     text-transform: uppercase;
@@ -60,7 +61,7 @@
   position: relative;
 }
 
-.ivu-table-cell-tree:not(.ivu-table-cell-tree-empty){
+.ivu-table-cell-tree:not(.ivu-table-cell-tree-empty) {
   &:hover {
     color: #202020;
     border-color: #202020;
@@ -83,5 +84,35 @@
 }
 
 .ivu-table-cell-tree-loading {
-  border: none!important;
+  border: none !important;
+}
+
+.ivu-tabs {
+
+  font-family: "Noto Sans", sans-serif !important;
+  color: #0b8eba !important;
+  font-size: 13px;
+  font-weight: 400;
+  text-transform: uppercase;
+
+  .ivu-tabs-ink-bar {
+    background-color: #0b8eba;
+  }
+
+  .ivu-tabs-tab-active {
+    font-weight: 600;
+  }
+
+  .ivu-tabs-tab-active,
+  .ivu-tabs-nav .ivu-tabs-tab:hover {
+    color: #0b8eba !important;
+  }
+
+  .ivu-tabs-tab {
+    color: #202020;
+  }
+
+  .ivu-tabs-bar {
+    border-bottom: 1px solid #d9d9d9;
+  }
 }

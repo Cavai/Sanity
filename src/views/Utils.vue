@@ -6,17 +6,15 @@
 </template>
 
 <script>
-import Header from '@/components/Header.vue';
+import Header from "@/components/Header.vue";
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
-  name: 'Utils',
+  name: "Utils",
   components: {
     Header,
-  }
-}
+  },
+};
 </script>
 
-<style>
-
-</style>
+<style></style>
