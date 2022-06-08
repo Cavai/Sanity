@@ -17,7 +17,7 @@
         <Tooltip content="Commit">
           <span v-if="row.commit" class="issue-icon"><Icon type="md-git-commit" /></span>
         </Tooltip>
-          <span v-if="row.commitData">
+          <span style="display: flex; align-items: center;" v-if="row.commitData">
             <Avatar :src="row.commitData.author.avatar" size="small" />
             &nbsp;
             <strong class="engineer-login">{{ row.commitData.author.login }}</strong>

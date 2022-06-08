@@ -71,7 +71,7 @@
             font-family: 'Noto Sans Mono', monospace;
           }
 
-          li:nth-child(1), li:nth-child(2) {
+          .ivu-tooltip:not(:last-child) li{
             &:after {
               content: "";
               position: absolute;
