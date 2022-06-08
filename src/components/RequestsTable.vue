@@ -39,13 +39,19 @@
         <span v-if="row.commits !== null"><SparkLine :commits="row.commits" :key="reRenderSparkLine" /></span>
         <div v-if="row.commitData">
           <ul class="commit-stats">
+            <Tooltip content="Files changed">
             <li><Icon type="ios-document-outline" />{{ row.commitData.stats.files }}</li>
+            </Tooltip>
+            <Tooltip content="Additions">
             <li style="color: #3bca51;">
               <Icon type="ios-add" />{{ row.commitData.stats.additions }}
             </li>
+            </Tooltip>
+            <Tooltip content="Deletions">
             <li style="color: #ff0629;">
               <Icon type="ios-remove" />{{ row.commitData.stats.deletions }}
             </li>
+            </Tooltip>
           </ul>
         </div>
       </template>
@@ -62,6 +68,11 @@
             {{ row.stage }}
           </div>
         </div>
+        <Tooltip content="Repository">
+          <span v-if="row.commitData">
+            <Icon type="md-folder" /> {{ row.commitData.repo }}
+          </span>
+        </Tooltip>
       </template>
       <template slot-scope="{ row }" slot="engineers">
         <div class="engineers-container" v-if="row.engineers !== null">
@@ -294,6 +305,7 @@ export default {
               deletions: commitData.data.stats.deletions,
             },
             timestamp: moment(commitData.data.commit.author.date).format('DD MMMM YYYY'),
+            repo: commitData.data.url.split(`${process.env.VUE_APP_ORGANISATION}/`)[1].split('/commits')[0],
           }
         }
       ]);
