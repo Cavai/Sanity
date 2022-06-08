@@ -1,5 +1,6 @@
 <template>
   <div id="requests">
+    <Spinner v-if="!rawData.length" />
     <Alert
       v-if="error.show"
       type="error"
@@ -16,7 +17,7 @@
       <h2>Requests</h2>
     </div>
     <div class="requests-content">
-      <RequestsTable :rawData="rawData" />
+      <RequestsTable v-if="rawData.length" :rawData="rawData" />
     </div>
   </div>
 </template>
@@ -26,6 +27,7 @@ import octokit from '@/mixins/octokit';
 
 import Header from '@/components/Header.vue';
 import RequestsTable from '@/components/RequestsTable.vue';
+import Spinner from '@/components/Spinner.vue';
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
@@ -33,6 +35,7 @@ export default {
   components: {
     Header,
     RequestsTable,
+    Spinner,
   },
   mixins: [octokit],
   data() {

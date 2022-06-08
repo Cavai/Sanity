@@ -18,18 +18,23 @@
           <span v-if="row.commit" class="issue-icon"><Icon type="md-git-commit" /></span>
         </Tooltip>
           <span v-if="row.commitData">
-            <Avatar :src="row.commitData.authorAvatar" size="small" />
+            <Avatar :src="row.commitData.author.avatar" size="small" />
             &nbsp;
-            <strong class="engineer-login">{{ row.commitData.author }}</strong>
+            <strong class="engineer-login">{{ row.commitData.author.login }}</strong>
+            &nbsp;
+            <Tooltip :content="row.commitData.timestamp">
+              <a :href="row.url" target="_blank">
+                {{ row.issue }}
+              </a>
+            </Tooltip>
           </span>
-          <a :href="row.url" target="_blank">
+          <a v-else :href="row.url" target="_blank">
             {{ row.issue }}
           </a>
           <Tooltip content="Merged pull request">
             <span v-if="row.state === 'closed'" class="issue-icon icon-violet"><Icon type="md-git-merge" /></span>
           </Tooltip>
       </template>
-      <!-- eslint-disable-next-line vue/no-unused-vars -->
       <template slot-scope="{ row }" slot="commits">
         <span v-if="row.commits !== null"><SparkLine :commits="row.commits" :key="reRenderSparkLine" /></span>
         <div v-if="row.commitData">
@@ -85,10 +90,65 @@ export default {
   props: {
     rawData: {
       type: Array
+    },
+    engineersFilter: {
+      type: Array
     }
   },
   components: {
     SparkLine,
+  },
+  created() {
+    this.tableData = [...this.rawData.map(request => {
+
+        const workPhases = request.body.split("# Work Phases")[1];
+        const tasksDone = this.countInString("- [x]", workPhases);
+        const tasksNotDone = this.countInString("- [ ]", workPhases);
+
+        const commits = request.commits.length && request.commits.flat().map(commit => commit.commit.author.date).sort((a, b) => moment(b).format('X') - moment(a).format('X'));
+
+        return {
+          id: request.id,
+          issue: request.title,
+          url: request.html_url,
+          commits,
+          last_commit: commits ? moment(commits[0]).format('DD MMM YYYY') : '-',
+          tasks_done: tasksDone,
+          tasks_not_done: tasksNotDone,
+          stage: request.labels.find(label => label.name.includes('STAGE')).name,
+          engineers: request.assignees,
+          children: request.pulls.length ? request.pulls.map(pull => ({
+              id: uuidv4(),
+              issue: pull.title,
+              url: pull.html_url,
+              commits: null,
+              last_commit: null,
+              tasks_done: null,
+              stage: null,
+              engineers: null,
+              pull: true,
+              state: pull.state,
+              children: pull.commits.length && pull.state === 'open' ? pull.commits.map(commit => ({
+                id: uuidv4(),
+                issue: commit.commit.message,
+                url: commit.html_url,
+                commits: null,
+                last_commit: null,
+                tasks_done: null,
+                stage: null,
+                engineers: null,
+                commit: true,
+                repo: pull.base.repo.name,
+                commit_sha: commit.sha,
+                _loading: false,
+                children: []
+              })) : [],
+            }))
+          : [],
+        }
+      })];
+
+      this.reRender = !this.reRender;
   },
   data () {
     return {
@@ -147,11 +207,24 @@ export default {
         {
           title: "Engineer(s)",
           slot: "engineers",
+          filters: [...new Set(this.rawData.map(pull => pull.assignees.map(assignee => assignee.login))
+                    .flat()
+                    .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())))]
+                    .map(engineer => {
+                      return {
+                        label: engineer,
+                        value: engineer,
+                      }
+                    }),
+          filterMultiple: true,
+          filterMethod(value, row) {
+            return row.engineers.map(engineer => engineer.login).includes(value);
+          },
           width: 150,
         }
       ],
       tableData: [],
-      stageLabelColors: ['00ffff', 'fffe00', 'ff0ea7']
+      stageLabelColors: ['00ffff', 'fffe00', 'ff0ea7'],
     }
   },
   methods: {
@@ -211,14 +284,16 @@ export default {
           stage: null,
           engineers: null,
           commitData: {
-            author: commitData.data.author.login,
-            authorAvatar: commitData.data.author.avatar_url,
+            author: {
+              login: commitData.data.author.login,
+              avatar: commitData.data.author.avatar_url,
+            },
             stats: {
               files: commitData.data.files.length,
               additions: commitData.data.stats.additions,
               deletions: commitData.data.stats.deletions,
             },
-            timestamp: moment(commitData.data.commit.author.date).format("dddd, MMMM Do YYYY, h:mm:ss a")
+            timestamp: moment(commitData.data.commit.author.date).format('DD MMMM YYYY'),
           }
         }
       ]);
@@ -271,59 +346,5 @@ export default {
       this.reRenderSparkLine = !this.reRenderSparkLine;
     }
   },
-  watch: {
-    rawData() {
-      this.tableData = [...this.rawData.map(request => {
-
-        const workPhases = request.body.split("# Work Phases")[1];
-        const tasksDone = this.countInString("- [x]", workPhases);
-        const tasksNotDone = this.countInString("- [ ]", workPhases);
-
-        const commits = request.commits.length && request.commits.flat().map(commit => commit.commit.author.date).sort((a, b) => moment(b).format('X') - moment(a).format('X'));
-
-        return {
-          id: request.id,
-          issue: request.title,
-          url: request.html_url,
-          commits,
-          last_commit: commits ? moment(commits[0]).format('DD MMM YYYY') : '-',
-          tasks_done: tasksDone,
-          tasks_not_done: tasksNotDone,
-          stage: request.labels.find(label => label.name.includes('STAGE')).name,
-          engineers: request.assignees,
-          children: request.pulls.length ? request.pulls.map(pull => ({
-              id: uuidv4(),
-              issue: pull.title,
-              url: pull.html_url,
-              commits: null,
-              last_commit: null,
-              tasks_done: null,
-              stage: null,
-              engineers: null,
-              pull: true,
-              state: pull.state,
-              children: pull.commits.length && pull.state === 'open' ? pull.commits.map(commit => ({
-                id: uuidv4(),
-                issue: commit.commit.message,
-                url: commit.html_url,
-                commits: null,
-                last_commit: null,
-                tasks_done: null,
-                stage: null,
-                engineers: null,
-                commit: true,
-                repo: pull.base.repo.name,
-                commit_sha: commit.sha,
-                _loading: false,
-                children: []
-              })) : [],
-            }))
-          : [],
-        }
-      })];
-
-      this.reRender = !this.reRender;
-    }
-  }
 }
 </script>

@@ -1,5 +1,6 @@
 <template>
   <div id="stream">
+    <Spinner v-if="!rawData.length" />
     <Alert
       v-if="error.show"
       type="error"
@@ -16,7 +17,7 @@
       <h2>Stream</h2>
     </div>
     <div class="requests-content">
-      <StreamTable :rawData="rawData" />
+      <StreamTable v-if="rawData.length" :rawData="rawData" />
     </div>
   </div>
 </template>
@@ -25,6 +26,7 @@
 import moment from 'moment';
 
 import Header from '@/components/Header.vue';
+import Spinner from '@/components/Spinner.vue';
 import StreamTable from '@/components/StreamTable.vue';
 
 export default {
@@ -32,6 +34,7 @@ export default {
   name: 'Stream',
   components: {
     Header,
+    Spinner,
     StreamTable,
   },
   created() {

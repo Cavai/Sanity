@@ -31,8 +31,6 @@
 </template>
 
 <script>
-/* eslint-disable no-unused-vars */
-
 import Logo from '@/components/Logo.vue';
 import Spinner from '@/components/Spinner.vue';
 

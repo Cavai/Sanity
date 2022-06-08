@@ -147,6 +147,19 @@ export default {
         {
             title: 'Assignees',
             slot: 'assignees',
+            filters: [...new Set(this.rawData.map(pull => pull.assignees.map(assignee => assignee.login))
+                    .flat()
+                    .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())))]
+                    .map(assignee => {
+                      return {
+                        label: assignee,
+                        value: assignee,
+                      }
+                    }),
+          filterMultiple: true,
+          filterMethod(value, row) {
+            return row.assignees.map(assignee => assignee.login).includes(value);
+          },
             width: 165,
         },
       ],
