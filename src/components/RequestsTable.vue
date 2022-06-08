@@ -32,6 +32,17 @@
       <!-- eslint-disable-next-line vue/no-unused-vars -->
       <template slot-scope="{ row }" slot="commits">
         <span v-if="row.commits !== null"><SparkLine :commits="row.commits" :key="reRenderSparkLine" /></span>
+        <div v-if="row.commitData">
+          <ul class="commit-stats">
+            <li><Icon type="ios-document-outline" />{{ row.commitData.stats.files }}</li>
+            <li style="color: #3bca51;">
+              <Icon type="ios-add" />{{ row.commitData.stats.additions }}
+            </li>
+            <li style="color: #ff0629;">
+              <Icon type="ios-remove" />{{ row.commitData.stats.deletions }}
+            </li>
+          </ul>
+        </div>
       </template>
       <template slot-scope="{ row }" slot="progress">
         <span v-if="row.tasks_done !== null">{{ row.tasks_done }}/{{ row.tasks_done + row.tasks_not_done}}</span>
@@ -53,17 +64,6 @@
             <Avatar :src="engineer.avatar_url" size="small" />
             <span class="engineer-login">{{ engineer.login }}</span>
           </div>
-        </div>
-        <div v-if="row.commitData">
-          <ul class="commit-stats">
-            <li><Icon type="ios-document-outline" />{{ row.commitData.stats.files }}</li>
-            <li style="color: #3bca51;">
-              <Icon type="ios-add" />{{ row.commitData.stats.additions }}
-            </li>
-            <li style="color: #ff0629;">
-              <Icon type="ios-remove" />{{ row.commitData.stats.deletions }}
-            </li>
-          </ul>
         </div>
       </template>
     </Table>
