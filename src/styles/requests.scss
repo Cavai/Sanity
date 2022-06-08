@@ -53,6 +53,22 @@
         .issue-icon {
           padding-right: 2px;
           color: #57606a;
+
+          &.icon-violet {
+            padding-left: 2px;
+            color: #8250df;
+          }
+        }
+
+        .commit-stats {
+          list-style-type: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          li {
+            margin: 0 5px;
+          }
         }
 
         &:nth-child(4) {

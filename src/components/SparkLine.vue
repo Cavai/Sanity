@@ -24,6 +24,25 @@ export default {
     if (this.commits.length) {
       let dates = this.commits.map(date => date.split('T')[0]);
 
+      this.generateSparkData(dates);
+    }
+  },
+  data() {
+    return {
+      sparkData: [],
+    }
+  },
+  computed: {
+    generateRandomValues() {
+      if (this.commits.length) {
+        return [0, ...this.sparkData];
+      } else {
+        return [0, 0, 0, 0, 0, 0, 0];
+      }
+    }
+  },
+  methods: {
+    generateSparkData(dates) {
       let firstCommit = moment.min(dates.map(d => moment(d)));
       let lastCommit = moment.max(dates.map(d => moment(d))).add(1, 'days');
 
@@ -42,20 +61,6 @@ export default {
       this.sparkData = datesRange.map(date => {
         return commitDates[date] ?? 0;
       });
-    }
-  },
-  data() {
-    return {
-      sparkData: [],
-    }
-  },
-  computed: {
-    generateRandomValues() {
-      if (this.commits.length) {
-        return [0, ...this.sparkData];
-      } else {
-        return [0, 0, 0, 0, 0, 0, 0];
-      }
     }
   }
 }

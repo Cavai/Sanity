@@ -6,12 +6,28 @@
       :columns="requestsHeaders"
       :data="tableData"
       :disabled-hover="true"
+      :update-show-children="true"
+      :load-data="handleCommitData"
       @on-sort-change="sortTable"
     >
       <template slot-scope="{ row }" slot="issue">
-        <span v-if="row.pull" class="issue-icon"><Icon type="md-git-pull-request" /></span>
-        <span v-if="row.commit" class="issue-icon"><Icon type="md-git-commit" /></span>
-        <a :href="row.url" target="_blank">{{ row.issue }}</a>
+        <Tooltip content="Pull request">
+          <span v-if="row.pull" class="issue-icon"><Icon type="md-git-pull-request" /></span>
+        </Tooltip>
+        <Tooltip content="Commit">
+          <span v-if="row.commit" class="issue-icon"><Icon type="md-git-commit" /></span>
+        </Tooltip>
+          <span v-if="row.commitData">
+            <Avatar :src="row.commitData.authorAvatar" size="small" />
+            &nbsp;
+            <strong class="engineer-login">{{ row.commitData.author }}</strong>
+          </span>
+          <a :href="row.url" target="_blank">
+            {{ row.issue }}
+          </a>
+          <Tooltip content="Merged pull request">
+            <span v-if="row.state === 'closed'" class="issue-icon icon-violet"><Icon type="md-git-merge" /></span>
+          </Tooltip>
       </template>
       <!-- eslint-disable-next-line vue/no-unused-vars -->
       <template slot-scope="{ row }" slot="commits">
@@ -38,6 +54,17 @@
             <span class="engineer-login">{{ engineer.login }}</span>
           </div>
         </div>
+        <div v-if="row.commitData">
+          <ul class="commit-stats">
+            <li><Icon type="ios-document-outline" />{{ row.commitData.stats.files }}</li>
+            <li style="color: #3bca51;">
+              <Icon type="ios-add" />{{ row.commitData.stats.additions }}
+            </li>
+            <li style="color: #ff0629;">
+              <Icon type="ios-remove" />{{ row.commitData.stats.deletions }}
+            </li>
+          </ul>
+        </div>
       </template>
     </Table>
   </div>
@@ -48,10 +75,13 @@ import isDarkColor from 'is-dark-color';
 import moment from 'moment';
 import { v4 as uuidv4 } from "uuid";
 
+import octokit from '@/mixins/octokit';
+
 import SparkLine from '@/components/SparkLine.vue';
 
 export default {
   name: 'RequestsTable',
+  mixins: [octokit],
   props: {
     rawData: {
       type: Array
@@ -161,6 +191,38 @@ export default {
           return this.stageLabelColors[2];
       }
     },
+    async handleCommitData (item, callback) {
+      const commitData = await this.octokit.repos.getCommit({
+        owner: process.env.VUE_APP_ORGANISATION,
+        repo: item.repo,
+        ref: item.commit_sha
+      });
+
+      callback([
+        {
+          id: uuidv4(),
+          issue: `commited ${moment(
+              new Date(commitData.data.commit.author.date)
+            ).fromNow()}`,
+          url: commitData.data.html_url,
+          commits: null,
+          last_commit: null,
+          tasks_done: null,
+          stage: null,
+          engineers: null,
+          commitData: {
+            author: commitData.data.author.login,
+            authorAvatar: commitData.data.author.avatar_url,
+            stats: {
+              files: commitData.data.files.length,
+              additions: commitData.data.stats.additions,
+              deletions: commitData.data.stats.deletions,
+            },
+            timestamp: moment(commitData.data.commit.author.date).format("dddd, MMMM Do YYYY, h:mm:ss a")
+          }
+        }
+      ]);
+    },
     sortTable(options) {
       if (options.column.title === 'Progress') {
         if (options.order === 'asc') {
@@ -229,7 +291,7 @@ export default {
           tasks_not_done: tasksNotDone,
           stage: request.labels.find(label => label.name.includes('STAGE')).name,
           engineers: request.assignees,
-          children: request.pulls.length ? request.pulls.filter(pull => pull.state === 'open').map(pull => ({
+          children: request.pulls.length ? request.pulls.map(pull => ({
               id: uuidv4(),
               issue: pull.title,
               url: pull.html_url,
@@ -239,7 +301,8 @@ export default {
               stage: null,
               engineers: null,
               pull: true,
-              children: pull.commits.length ? pull.commits.map(commit => ({
+              state: pull.state,
+              children: pull.commits.length && pull.state === 'open' ? pull.commits.map(commit => ({
                 id: uuidv4(),
                 issue: commit.commit.message,
                 url: commit.html_url,
@@ -249,6 +312,10 @@ export default {
                 stage: null,
                 engineers: null,
                 commit: true,
+                repo: pull.base.repo.name,
+                commit_sha: commit.sha,
+                _loading: false,
+                children: []
               })) : [],
             }))
           : [],

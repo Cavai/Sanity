@@ -129,7 +129,7 @@ export default {
           // Main token
           this.$store.commit('setToken', process.env.VUE_APP_GH_TOKEN);
         } else {
-          // Alternative token
+          // Alternative token (TODO: update logic)
           this.$store.commit('setToken', process.env.VUE_APP_GH_TOKEN_ALT);
         }
         this.preCacheData(octokit);

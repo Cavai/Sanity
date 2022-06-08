@@ -48,12 +48,13 @@ export default {
   methods: {
     async prepareCommits() {
       if (!sessionStorage.getItem('cachedCommits')) {
-        const commitsPromises = this.$store.state.cachedPullRequests.map(pull => {
+        const commitsPromises = this.$store.state.cachedPullRequests.filter(pull => pull.data.title.includes('RFC')).map(pull => {
+            console.log(pull.data.title);
             return this.octokit.pulls.listCommits({
-              owner: "Cavai",
+              owner: process.env.VUE_APP_ORGANISATION,
               repo: pull.repo,
               pull_number: pull.id,
-              per_page: 50 // spark line based max on last 50 commits
+              per_page: 50 // Verify is 50 enough
             });
           });
 
@@ -65,7 +66,7 @@ export default {
     },
     async getInitialData() {
       const commits = await this.prepareCommits();
-      const aggregator = this.$store.state.cachedPullRequests.map((pull, index) => {
+      const aggregator = this.$store.state.cachedPullRequests.filter(pull => pull.data.title.includes('RFC')).map((pull, index) => {
         return {
           ...pull,
           commits: commits[index]

@@ -16,7 +16,9 @@ const octokit = {
       if (data.data.resources.core.used > data.data.resources.core.limit) {
         this.error = {...this.error, show: true};
       } else {
-        this.getInitialData();
+        if (this.getInitialData) {
+          this.getInitialData();
+        }
       }
     });
   },
