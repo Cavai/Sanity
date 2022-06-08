@@ -1,6 +1,6 @@
 <template>
   <div id="requests">
-    <Spinner v-if="!rawData.length" />
+    <Spinner v-if="!rawData.length && !error.show" />
     <Alert v-if="error.show" type="error" show-icon class="error_container">
       {{ error.message }}
       <span slot="desc"> Please try again in a few minutes. </span>
@@ -81,22 +81,28 @@ export default {
       const requestsData = this.$store.state.cachedIssues.find(
         (repo) => repo.repo === "Requests"
       );
-      const requestsDataFiltered = requestsData.data.filter(
-        (issue) =>
-          issue.labels.filter((label) => labels.includes(label.name)).length
-      );
 
-      this.rawData = requestsDataFiltered.map((request) => {
-        const matchedPRs = aggregator.filter((pr) =>
-          pr.data.title.includes(request.title.split("]")[0])
+      if (requestsData) {
+        const requestsDataFiltered = requestsData.data.filter(
+          (issue) =>
+            issue.labels.filter((label) => labels.includes(label.name)).length
         );
 
-        return {
-          ...request,
-          pulls: matchedPRs.map((pr) => ({ ...pr.data, commits: pr.commits })),
-          commits: matchedPRs.map((pr) => pr.commits).flat(),
-        };
-      });
+        this.rawData = requestsDataFiltered.map((request) => {
+          const matchedPRs = aggregator.filter((pr) =>
+            pr.data.title.includes(request.title.split("]")[0])
+          );
+
+          return {
+            ...request,
+            pulls: matchedPRs.map((pr) => ({ ...pr.data, commits: pr.commits })),
+            commits: matchedPRs.map((pr) => pr.commits).flat(),
+          };
+        });
+      } else {
+        this.error.show = true;
+      }
+
     },
   },
 };

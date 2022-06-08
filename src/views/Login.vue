@@ -88,7 +88,7 @@ export default {
 
           octokit.orgs
             .getMembershipForUser({
-              org: "Cavai",
+              org: process.env.VUE_APP_ORGANISATION,
               username: result.additionalUserInfo.username,
             })
             .then(() => {

@@ -108,6 +108,10 @@ i.ivu-icon-ios-funnel.on {
     color: #0b8eba !important;
   }
 
+  .ivu-select-selection-focused, .ivu-select-selection:hover {
+    border-color: #0b8eba;
+  }
+
   .ivu-tabs-tab {
     color: #202020;
   }
