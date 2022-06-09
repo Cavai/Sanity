@@ -208,6 +208,9 @@ export default {
       }
 
       try {
+
+        this.commitsData = [];
+
         const commitsPromises = [];
 
         if (this.selectedRepositories[0] === "All") {
