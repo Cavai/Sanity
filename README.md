@@ -39,7 +39,12 @@ To get started with Sanity, you will need three things:
 7) Select the `Sanity` repository
 8) Set build output directory to `/public`
 9) Add all the environment variables from [.env.example](.env.example)
-10) Deploy
+10) Test deploy
+11) In the main view of the sanity pages setup go to `Custom domains` tab
+12) Click `Setup domain`
+13) Enter the domain name that you are going to use (e.g. sanity.xyz.com)
+
+You should be now able to see **Sanity** for your organization in the domain that you had given, and also have automatic CI for PRs if you end up making changes to your **Sanity** fork.
 
 ## Docs
 
