@@ -1,32 +1,41 @@
 <h1 align="center">
   <br>
-  <a href="https://cavai.com"><img src="https://avatars.githubusercontent.com/u/53564323" alt="Cavai" width="150"></a>
+  <a href="https://cavai.com"><img src="https://raw.githubusercontent.com/Cavai/Sanity/main/Sanity-Logo.png" alt="Cavai" width="150"></a>
   <br>
 </h1>
 
-<h3 align="center">Housekeeping</h3>
+<h3 align="center">Sanity</h3>
 
 <p align="center">
-  <a href="#description">Description</a> •
-  <a href="#owner">Owner</a> •
-  <a href="#integrations">Integrations</a> •
-  <a href="#docs">Docs</a>
+  <a href="#background">Background</a> •
+  <a href="#getting-started">Getting Started</a> •
+  <a href="#docs">Docs</a> •
+  <a href="#contributors">Contributors</a>
 </p>
 <hr>
 
-## Description
+## Background
 
-For structural, procedural, and other aspects that pertain to all other repos.
+**Sanity** provides three different horizons to a software project/organization: 
 
-## Owner
+- **Requests** - all RFCs that meet a set criteria
+- **Stream** - all Github activity of the organization
+- **Horizon** - all commits at the level of individual contributors
 
-- [@olszewa](https://github.com/olszewa)
-- [@mikkokotila](https://github.com/mikkokotila)
+## Getting Started (takes about 5 minutes)
 
-## Integrations
+To get started with Sanity, you will need three things: 
 
-No integrations with other repos.
+- A Github organization (can be private or public)
+- A [Firebase](https://firebase.google.com/) account
+- The contents of this repo
 
 ## Docs
 
-No documentations.
+No documentation available at this time.
+
+## Contributors
+
+- [@olszewa](https://github.com/olszewa)
+- [@mikkokotila](https://github.com/mikkokotila)
+- [@mcsneaky](https://github.com/mcsneaky)
