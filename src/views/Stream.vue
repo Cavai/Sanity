@@ -40,7 +40,6 @@ export default {
   },
   created() {
     try {
-
       const pullsData = this.$store.state.cachedPullRequests
         .map((pull) => {
           return {
@@ -78,16 +77,14 @@ export default {
       });
 
       this.rawData = [...pullsData, ...issuesData.flat()];
-
-    } catch(error) {
-
+    } catch (error) {
       this.showAlert(
-          `An error has occured with the data fetch`,
-          `Please try again in a few minutes.`,
-          'error'
-        );
+        `An error has occured with the data fetch`,
+        `Please try again in a few minutes.`,
+        "error"
+      );
 
-        return;
+      return;
     }
 
     this.showSpinner = false;
@@ -113,7 +110,7 @@ export default {
       this.showSpinner = false;
       this.error.show = true;
     },
-  }
+  },
 };
 </script>
 

@@ -73,11 +73,10 @@ export default {
         );
 
         if (!requestsData) {
-
           this.showAlert(
             `Your organisation doesn't have Requests repository`,
             `Requests repository is required for Sanity work.`,
-            'warning',
+            "warning"
           );
 
           return false;
@@ -95,17 +94,20 @@ export default {
 
           return {
             ...request,
-            pulls: matchedPRs.map((pr) => ({ ...pr.data, commits: pr.commits })),
+            pulls: matchedPRs.map((pr) => ({
+              ...pr.data,
+              commits: pr.commits,
+            })),
             commits: matchedPRs.map((pr) => pr.commits).flat(),
           };
         });
 
         this.showSpinner = false;
-      } catch(error) {
+      } catch (error) {
         this.showAlert(
           `An error has occured with the data fetch`,
           `Please try again in a few minutes.`,
-          'error'
+          "error"
         );
 
         return;
@@ -113,7 +115,6 @@ export default {
     },
     async prepareCommits() {
       try {
-
         if (!sessionStorage.getItem("cachedCommits")) {
           const commitsPromises = this.$store.state.cachedPullRequests
             .filter((pull) => pull.data.title.includes("RFC"))
@@ -132,13 +133,11 @@ export default {
             JSON.stringify(commits.map((commit) => commit.value.data))
           );
         }
-
-      } catch(error) {
-
+      } catch (error) {
         this.showAlert(
           `An error has occured with the data fetch`,
           `Please try again in a few minutes.`,
-          'error'
+          "error"
         );
 
         return;

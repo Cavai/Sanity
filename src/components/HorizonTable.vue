@@ -6,38 +6,39 @@
       :disabled-hover="true"
       :update-show-children="true"
     >
-    <template slot-scope="{ row }" slot="commit">
-      <a :href="row.url" target="_blank">
-        {{ row.commit }}
-      </a>
-    </template>
-    <template slot-scope="{ row }" slot="repository">
-      <a :href="row.repository_url" target="_blank">{{ row.repository }}</a>
-    </template>
+      <template slot-scope="{ row }" slot="commit">
+        <a :href="row.url" target="_blank">
+          {{ row.commit }}
+        </a>
+      </template>
+      <template slot-scope="{ row }" slot="repository">
+        <a :href="row.repository_url" target="_blank">{{ row.repository }}</a>
+      </template>
     </Table>
   </div>
 </template>
 
 <script>
-import moment from 'moment';
+import moment from "moment";
 
 export default {
   name: "HorizonTable",
-  props: ['commitsData'],
+  props: ["commitsData"],
   created() {
     this.tableData = this.commitsData
-                      .map(repo => repo.commits
-                      .map(commit => ({...commit, repo: repo.repo})))
-                      .flat()
-                      .map(commit => {
-    return {
-            date: moment(new Date(commit.commit.author.date)).format("LLLL"),
-            commit: commit.commit.message,
-            url: commit.html_url,
-            repository: commit.repo,
-            repository_url: `https://github.com/${process.env.VUE_APP_ORGANISATION}/${commit.repo}`,
-          }
-        })
+      .map((repo) =>
+        repo.commits.map((commit) => ({ ...commit, repo: repo.repo }))
+      )
+      .flat()
+      .map((commit) => {
+        return {
+          date: moment(new Date(commit.commit.author.date)).format("LLLL"),
+          commit: commit.commit.message,
+          url: commit.html_url,
+          repository: commit.repo,
+          repository_url: `https://github.com/${process.env.VUE_APP_ORGANISATION}/${commit.repo}`,
+        };
+      });
   },
   data() {
     return {

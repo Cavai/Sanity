@@ -23,13 +23,13 @@
         <div class="author-container">
           <Avatar :src="row.author.avatar_url" size="small" />
           <router-link
-              tag="span"
-              class="author-login"
-              style="cursor: pointer;"
-              :to="`/horizon/${row.author.login.toLowerCase()}`"
-            >
-              {{ row.author.login }}
-            </router-link>
+            tag="span"
+            class="author-login"
+            style="cursor: pointer"
+            :to="`/horizon/${row.author.login.toLowerCase()}`"
+          >
+            {{ row.author.login }}
+          </router-link>
         </div>
       </template>
       <template slot-scope="{ row }" slot="assignees">
@@ -39,7 +39,7 @@
             <router-link
               tag="span"
               class="assignee-login"
-              style="cursor: pointer;"
+              style="cursor: pointer"
               :to="`/horizon/${assignee.login.toLowerCase()}`"
             >
               {{ assignee.login }}

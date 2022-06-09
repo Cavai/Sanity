@@ -41,7 +41,10 @@
           class="sub-menu-repository"
         >
           <Option
-            v-for="repo in [{ name: 'All', id: 0 }, ...$store.state.cachedRepositories]"
+            v-for="repo in [
+              { name: 'All', id: 0 },
+              ...$store.state.cachedRepositories,
+            ]"
             :value="repo.name"
             :key="repo.id"
           >
@@ -60,7 +63,10 @@
         ></DatePicker>
       </FormItem>
       <FormItem style="margin-top: 24px">
-        <Button class="sub-menu-search" icon="ios-search-outline" @click="getHorizonData"
+        <Button
+          class="sub-menu-search"
+          icon="ios-search-outline"
+          @click="getHorizonData"
           >Search</Button
         >
       </FormItem>
@@ -73,8 +79,8 @@
       </TabPane>
       <TabPane label="Table" name="table">
         <div class="horizon-content-table"> -->
-          <HorizonTable v-if="commitsData.length" :commitsData="commitsData" />
-        <!-- </div>
+    <HorizonTable v-if="commitsData.length" :commitsData="commitsData" />
+    <!-- </div>
       </TabPane>
     </Tabs> -->
   </div>
@@ -101,8 +107,8 @@ export default {
   mounted() {
     if (this.$route.params.engineer) {
       this.selectedUser = this.$store.state.cachedUsers.find(
-            (user) => this.$route.params.engineer === user.login.toLowerCase()
-          ).login;
+        (user) => this.$route.params.engineer === user.login.toLowerCase()
+      ).login;
 
       this.$nextTick(() => {
         this.getHorizonData();
@@ -121,10 +127,8 @@ export default {
       selectedUser: null,
       selectedRepositories: ["All"],
       selectedDateRange: [
-        moment()
-          .subtract(7, "days")
-          .format(),
-        moment().format()
+        moment().subtract(7, "days").format(),
+        moment().format(),
       ],
       pickerShortcuts: {
         shortcuts: [
@@ -192,61 +196,65 @@ export default {
       return `+${num} more`;
     },
     async getHorizonData() {
-      if (!this.selectedUser || !this.selectedRepositories.length || !this.selectedDateRange[0] || !this.selectedDateRange[1]) {
+      if (
+        !this.selectedUser ||
+        !this.selectedRepositories.length ||
+        !this.selectedDateRange[0] ||
+        !this.selectedDateRange[1]
+      ) {
         return false;
       }
 
       try {
-
         const commitsPromises = [];
 
-        if (this.selectedRepositories[0] === 'All') {
-          this.$store.state.cachedRepositories.forEach(repository => {
-            commitsPromises.push(this.octokit.repos.listCommits({
-              owner: process.env.VUE_APP_ORGANISATION,
-              repo: repository.name,
-              author: this.selectedUser,
-              since: moment(this.selectedDateRange[0]).toISOString(),
-                      until: moment(this.selectedDateRange[1])
-                        .add("1", "day")
-                        .toISOString(),
-              per_page: 100,
-            }))
-          })
+        if (this.selectedRepositories[0] === "All") {
+          this.$store.state.cachedRepositories.forEach((repository) => {
+            commitsPromises.push(
+              this.octokit.repos.listCommits({
+                owner: process.env.VUE_APP_ORGANISATION,
+                repo: repository.name,
+                author: this.selectedUser,
+                since: moment(this.selectedDateRange[0]).toISOString(),
+                until: moment(this.selectedDateRange[1])
+                  .add("1", "day")
+                  .toISOString(),
+                per_page: 100,
+              })
+            );
+          });
         } else {
-          this.selectedRepositories.forEach(repository => {
-            commitsPromises.push(this.octokit.repos.listCommits({
-              owner: process.env.VUE_APP_ORGANISATION,
-              repo: repository,
-              author: this.selectedUser,
-              since: moment(this.selectedDateRange[0]).toISOString(),
-                      until: moment(this.selectedDateRange[1])
-                        .add("1", "day")
-                        .toISOString(),
-              per_page: 100,
-            }))
-          })
+          this.selectedRepositories.forEach((repository) => {
+            commitsPromises.push(
+              this.octokit.repos.listCommits({
+                owner: process.env.VUE_APP_ORGANISATION,
+                repo: repository,
+                author: this.selectedUser,
+                since: moment(this.selectedDateRange[0]).toISOString(),
+                until: moment(this.selectedDateRange[1])
+                  .add("1", "day")
+                  .toISOString(),
+                per_page: 100,
+              })
+            );
+          });
         }
 
         const commits = await Promise.allSettled(commitsPromises);
 
-        this.commitsData = commits.map(repo => {
+        this.commitsData = commits.map((repo) => {
           return {
             commits: repo.value.data,
             repo: repo.value.url
-                .split(`${process.env.VUE_APP_ORGANISATION}/`)[1]
-                .split("/commits")[0],
-          }
+              .split(`${process.env.VUE_APP_ORGANISATION}/`)[1]
+              .split("/commits")[0],
+          };
         });
-
-      } catch(error) {
-
-        console.log(error);
-
+      } catch (error) {
         this.showAlert(
           `An error has occured with the data fetch`,
           `Please try again in a few minutes.`,
-          'error'
+          "error"
         );
 
         return;
@@ -265,14 +273,17 @@ export default {
     selectedRepositories(newVal, oldVal) {
       // Delete "All"
       if (newVal.length > 1 && oldVal.includes("All")) {
-        this.selectedRepositories.splice(this.selectedRepositories.indexOf("All"), 1);
+        this.selectedRepositories.splice(
+          this.selectedRepositories.indexOf("All"),
+          1
+        );
       }
       // Add "All", delete others
       if (newVal.length > 1 && newVal.includes("All")) {
         this.selectedRepositories = ["All"];
       }
     },
-  }
+  },
 };
 </script>
 

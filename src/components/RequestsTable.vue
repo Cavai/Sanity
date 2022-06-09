@@ -27,7 +27,7 @@
           <router-link
             tag="strong"
             class="engineer-login"
-            style="cursor: pointer;"
+            style="cursor: pointer"
             :to="`/horizon/${row.commitData.author.login.toLowerCase()}`"
           >
             {{ row.commitData.author.login }}
@@ -100,7 +100,9 @@
           <span v-if="row.commitData">
             <Icon type="md-folder" />
             &nbsp;
-            <a :href="row.commitData.repo_url" target="_blank">{{ row.commitData.repo }}</a>
+            <a :href="row.commitData.repo_url" target="_blank">{{
+              row.commitData.repo
+            }}</a>
           </span>
         </Tooltip>
       </template>
@@ -111,7 +113,7 @@
             <router-link
               tag="span"
               class="engineer-login"
-              style="cursor: pointer;"
+              style="cursor: pointer"
               :to="`/horizon/${engineer.login.toLowerCase()}`"
             >
               {{ engineer.login }}
@@ -367,9 +369,11 @@ export default {
             repo: commitData.data.url
               .split(`${process.env.VUE_APP_ORGANISATION}/`)[1]
               .split("/commits")[0],
-            repo_url: `https://github.com/${process.env.VUE_APP_ORGANISATION}/${commitData.data.url
-              .split(`${process.env.VUE_APP_ORGANISATION}/`)[1]
-              .split("/commits")[0]}`
+            repo_url: `https://github.com/${process.env.VUE_APP_ORGANISATION}/${
+              commitData.data.url
+                .split(`${process.env.VUE_APP_ORGANISATION}/`)[1]
+                .split("/commits")[0]
+            }`,
           },
         },
       ]);

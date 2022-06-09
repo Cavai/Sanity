@@ -116,9 +116,9 @@ export default {
 
               this.showAlert(
                 `You're not recognized as ${this.organisationName} organisation member`,
-                'Please contact your line manager',
-                'error'
-              )
+                "Please contact your line manager",
+                "error"
+              );
             });
         });
     },
@@ -161,7 +161,6 @@ export default {
     async preCacheData(octokit) {
       // Users
       try {
-
         const { data: users } = await octokit.orgs.listMembers({
           org: process.env.VUE_APP_ORGANISATION,
           per_page: 100,
@@ -173,13 +172,11 @@ export default {
             a.login.toLowerCase().localeCompare(b.login.toLowerCase())
           )
         );
-
-      } catch(error) {
-
+      } catch (error) {
         this.showAlert(
           `An error has occured with the data fetch`,
           `Please try again in a few minutes.`,
-          'error'
+          "error"
         );
 
         this.$store.commit("logoutUser");
@@ -189,7 +186,6 @@ export default {
 
       // Repositories
       try {
-
         const { data: repos } = await octokit.repos.listForOrg({
           org: process.env.VUE_APP_ORGANISATION,
           per_page: 100,
@@ -248,7 +244,9 @@ export default {
           .filter((pulls) => pulls)
           .flat()
           .filter((pull) => {
-            return pull.data.state === "open" || pull.data.title.includes("RFC");
+            return (
+              pull.data.state === "open" || pull.data.title.includes("RFC")
+            );
           });
 
         this.$store.commit("setCachedPulls", pullsFiltered);
@@ -266,13 +264,11 @@ export default {
         });
 
         this.$store.commit("setCachedIssues", issuesFiltered);
-
-      } catch(error) {
-
+      } catch (error) {
         this.showAlert(
           `An error has occured with the data fetch`,
           `Please try again in a few minutes.`,
-          'error'
+          "error"
         );
 
         this.$store.commit("logoutUser");
