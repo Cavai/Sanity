@@ -30,19 +30,26 @@ To get started with Sanity, you will need three things:
 - A [Firebase](https://firebase.google.com/) account
 - The contents of this repo
 
-1) Create a fork of this repository to your Github organization
-2) Go to the Github organization's settings and pick `Github Apps`
-3) Configure the Cloudflare app to allow `Sanity` repo
-4) Login to your Cloudflare dashboard and go to `Pages`
-5) Create a new project and choose `Connect to Git`
-6) Choose the correct Github organization
-7) Select the `Sanity` repository
-8) Set build output directory to `/public`
-9) Add all the environment variables from [.env.example](.env.example)
-10) Test deploy
-11) In the main view of the sanity pages setup go to `Custom domains` tab
-12) Click `Setup domain`
-13) Enter the domain name that you are going to use (e.g. sanity.xyz.com)
+### Creating a Firebase app (Required)
+
+- In `Authentication` go to `Sign-in method`
+- Under `Authorized domains` add
+
+### Setting up Sanity with Cloudflare pages (Optional)
+
+1) Go to the Github organization's settings and pick `Github Apps`
+2) Configure the Cloudflare app to allow `Sanity` repo
+3) Login to your Cloudflare dashboard and go to `Pages`
+4) Create a new project and choose `Connect to Git`
+5) Choose the correct Github organization
+6) Select the `Sanity` repository
+7) Set build output directory to `/public`
+8) Add all the environment variables from [.env.example](.env.example)
+9) Test deploy
+10) In the main view of the sanity pages setup go to `Custom domains` tab
+11) Click `Setup domain`
+12) Enter the domain name that you are going to use (e.g. sanity.xyz.com)
+13) Finally, add the domain name you are using to Firebase for the Sanity app
 
 You should be now able to see **Sanity** for your organization in the domain that you had given, and also have automatic CI for PRs if you end up making changes to your **Sanity** fork.
 
