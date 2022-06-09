@@ -23,6 +23,15 @@ body {
   fill: #fefefe;
 }
 
+.logo {
+  background: white;
+  border-radius: 5px;
+
+  img {
+    border-radius: 5px;
+  }
+}
+
 .error_container {
   position: absolute;
   top: 25px;

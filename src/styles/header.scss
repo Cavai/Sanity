@@ -23,10 +23,10 @@
 
   .header-left {
     a {
-      &.header_link_logo {
-        position: relative;
-        top: 2px;
-      }
+      // &.header_link_logo {
+      //   position: relative;
+      //   top: 2px;
+      // }
     }
   }
 
@@ -43,6 +43,7 @@
 
   .header-export,
   .header-user {
+    margin-right: 25px;
     span {
       cursor: pointer;
     }

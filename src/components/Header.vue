@@ -2,7 +2,7 @@
   <div id="header">
     <nav class="header-left">
       <router-link to="/" class="header_link_logo">
-        <Logo :height="18" :lightMode="true" />
+        <Logo :size="26" />
       </router-link>
       <router-link to="/requests">Requests</router-link>
       <router-link to="/stream">Stream</router-link>

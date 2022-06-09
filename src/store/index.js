@@ -28,6 +28,7 @@ export default new Vuex.Store({
     cachedRepositories: null,
     cachedPullRequests: null,
     cachedIssues: null,
+    cachedLogo: null,
   },
   getters: {
     isExpired: (state) => new Date(state.expiryDate) < new Date(),
@@ -72,5 +73,8 @@ export default new Vuex.Store({
     setCachedIssues: (state, issues) => {
       state.cachedIssues = issues;
     },
+    setCachedLogo: (state, logo) => {
+      state.cachedLogo = logo;
+    }
   },
 });
