@@ -40,18 +40,23 @@
       background: #ffffff;
     }
 
-    .sub-menu-engineer, .sub-menu-date-picker {
-      width: 250px;
+    .sub-menu-engineer {
+      max-width: 200px;
+    }
+
+    .sub-menu-engineer,
+    .sub-menu-date-picker {
+      max-width: 300px;
     }
 
     .sub-menu-repository {
-      width: 300px;
+      max-width: 450px;
     }
 
     .sub-menu-search {
       background: #0588bf;
       color: #ffffff;
-      width: 150px;
+      max-width: 200px;
 
       font-style: normal;
       font-weight: 300;
@@ -61,9 +66,9 @@
       line-height: 15px;
       padding-left: 15px;
       padding-right: 15px;
-      background-image: linear-gradient(180deg,#0c9fcc 50.52%,#0b8eba);
+      background-image: linear-gradient(180deg, #0c9fcc 50.52%, #0b8eba);
       border-radius: 4px;
-      transition: box-shadow .16s ease-in-out;
+      transition: box-shadow 0.16s ease-in-out;
       border: none;
       z-index: 1;
       position: relative;
@@ -71,7 +76,7 @@
   }
 
   #horizon-table {
-    margin: 30px 30px;
+    margin: 15px 30px;
 
     table {
       border-radius: 55px;
@@ -98,6 +103,10 @@
         line-height: 18px;
 
         height: 40px;
+
+        a {
+          color: #202020;
+        }
       }
     }
   }

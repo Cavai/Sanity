@@ -1,58 +1,73 @@
 <template>
   <div id="horizon-table">
     <Table
-      :columns="columns1"
-      :data="data1"
+      :columns="columns"
+      :data="tableData"
       :disabled-hover="true"
       :update-show-children="true"
     >
+    <template slot-scope="{ row }" slot="commit">
+      <a :href="row.url" target="_blank">
+        {{ row.commit }}
+      </a>
+    </template>
+    <template slot-scope="{ row }" slot="repository">
+      <a :href="row.repository_url" target="_blank">{{ row.repository }}</a>
+    </template>
     </Table>
   </div>
 </template>
 
 <script>
+import moment from 'moment';
+
 export default {
   name: "HorizonTable",
+  props: ['commitsData'],
+  created() {
+    this.tableData = this.commitsData
+                      .map(repo => repo.commits
+                      .map(commit => ({...commit, repo: repo.repo})))
+                      .flat()
+                      .map(commit => {
+    return {
+            date: moment(new Date(commit.commit.author.date)).format("LLLL"),
+            commit: commit.commit.message,
+            url: commit.html_url,
+            repository: commit.repo,
+            repository_url: `https://github.com/${process.env.VUE_APP_ORGANISATION}/${commit.repo}`,
+          }
+        })
+  },
   data() {
     return {
-      columns1: [
+      tableData: [],
+      columns: [
         {
-          title: "Name",
-          key: "name",
+          title: "Date",
+          key: "date",
+          width: 300,
+          sortable: true,
+          sortMethod(a, b, type) {
+            if (type === "asc") {
+              return moment(a).unix() - moment(b).unix();
+            } else {
+              return moment(b).unix() - moment(a).unix();
+            }
+          },
         },
         {
-          title: "Age",
-          key: "age",
+          title: "Commit",
+          key: "commit",
+          slot: "commit",
+          minWidth: 300,
         },
         {
-          title: "Address",
-          key: "address",
-        },
-      ],
-      data1: [
-        {
-          name: "John Brown",
-          age: 18,
-          address: "New York No. 1 Lake Park",
-          date: "2016-10-03",
-        },
-        {
-          name: "Jim Green",
-          age: 24,
-          address: "London No. 1 Lake Park",
-          date: "2016-10-01",
-        },
-        {
-          name: "Joe Black",
-          age: 30,
-          address: "Sydney No. 1 Lake Park",
-          date: "2016-10-02",
-        },
-        {
-          name: "Jon Snow",
-          age: 26,
-          address: "Ottawa No. 2 Lake Park",
-          date: "2016-10-04",
+          title: "Repository",
+          key: "repository",
+          slot: "repository",
+          sortable: true,
+          width: 250,
         },
       ],
     };

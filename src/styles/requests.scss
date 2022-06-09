@@ -1,4 +1,8 @@
 #requests {
+  .no-data {
+    margin-left: 30px;
+  }
+
   .sub-header {
     height: 45px;
 
@@ -102,14 +106,15 @@
     }
 
     .labels-container {
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
+      margin: 2.5px 0;
 
-      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
 
       .label {
-        margin: 5px 0;
+        margin: 2.5px 0;
         padding: 0 7px;
 
         border-width: 1px;

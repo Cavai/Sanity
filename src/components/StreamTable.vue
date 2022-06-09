@@ -4,6 +4,9 @@
       <template slot-scope="{ row }" slot="title">
         <a :href="row.url" target="_blank">{{ row.title }}</a>
       </template>
+      <template slot-scope="{ row }" slot="repository">
+        <a :href="row.repository_url" target="_blank">{{ row.repository }}</a>
+      </template>
       <template slot-scope="{ row }" slot="labels">
         <div class="labels-container">
           <div
@@ -19,14 +22,28 @@
       <template slot-scope="{ row }" slot="author">
         <div class="author-container">
           <Avatar :src="row.author.avatar_url" size="small" />
-          <span class="author-login">{{ row.author.login }}</span>
+          <router-link
+              tag="span"
+              class="author-login"
+              style="cursor: pointer;"
+              :to="`/horizon/${row.author.login.toLowerCase()}`"
+            >
+              {{ row.author.login }}
+            </router-link>
         </div>
       </template>
       <template slot-scope="{ row }" slot="assignees">
         <div class="assignees-container">
           <div v-for="assignee in row.assignees" :key="assignee.login">
             <Avatar :src="assignee.avatar_url" size="small" />
-            <span class="assignee-login">{{ assignee.login }}</span>
+            <router-link
+              tag="span"
+              class="assignee-login"
+              style="cursor: pointer;"
+              :to="`/horizon/${assignee.login.toLowerCase()}`"
+            >
+              {{ assignee.login }}
+            </router-link>
           </div>
         </div>
       </template>
@@ -76,6 +93,7 @@ export default {
         {
           title: "Repository",
           key: "repository",
+          slot: "repository",
           sortable: true,
           filters: [...new Set(this.rawData.map((entry) => entry.repository))]
             .sort((a, b) => a.localeCompare(b))
@@ -181,8 +199,6 @@ export default {
   methods: {
     generateLabelStyles(name, color) {
       const value = `#${color}`;
-      const calculateWidth =
-        name.length > 20 ? name.length * 8 : name.length * 12;
       return {
         backgroundColor: value,
         borderColor: value === "#ffffff" ? "gray" : "transparent",

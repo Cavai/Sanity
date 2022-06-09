@@ -73,6 +73,23 @@ const routes = [
     },
   },
   {
+    path: "/horizon/:engineer",
+    name: "Horizon +user",
+    component: () =>
+      import(/* webpackChunkName: "horizon" */ "../views/Horizon.vue"),
+    props: true,
+    beforeEnter: (to, from, next) => {
+      if (!store.state.userAuthenticated || store.getters.isExpired) {
+        next({
+          path: "/",
+          query: { to: "horizon" },
+        });
+      } else {
+        next();
+      }
+    },
+  },
+  {
     path: "/utils",
     name: "Utils",
     component: () =>

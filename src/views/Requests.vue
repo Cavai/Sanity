@@ -1,9 +1,14 @@
 <template>
   <div id="requests">
-    <Spinner v-if="!rawData.length && !error.show" />
-    <Alert v-if="error.show" type="error" show-icon class="error_container">
-      {{ error.message }}
-      <span slot="desc"> Please try again in a few minutes. </span>
+    <Spinner v-if="showSpinner && !rawData.length" />
+    <Alert
+      v-if="error.show"
+      :type="error.type"
+      show-icon
+      class="error_container"
+    >
+      {{ error.title }}
+      <span slot="desc">{{ error.message }}</span>
     </Alert>
     <Header />
     <div class="sub-header">
@@ -11,6 +16,9 @@
     </div>
     <div class="requests-content">
       <RequestsTable v-if="rawData.length" :rawData="rawData" />
+      <span class="no-data" v-if="!showSpinner && !rawData.length"
+        >No data</span
+      >
     </div>
   </div>
 </template>
@@ -33,56 +41,48 @@ export default {
   mixins: [octokit],
   data() {
     return {
+      additionalData: [],
       error: {
         show: false,
-        message: "Service temporarily unavailable",
+        title: "Service temporarily unavailable",
+        message: "Please try again in a few minutes.",
+        type: "error",
       },
       rawData: [],
-      additionalData: [],
+      showSpinner: true,
     };
   },
   methods: {
-    async prepareCommits() {
-      if (!sessionStorage.getItem("cachedCommits")) {
-        const commitsPromises = this.$store.state.cachedPullRequests
+    async getInitialData() {
+      try {
+        const commits = await this.prepareCommits();
+        const aggregator = this.$store.state.cachedPullRequests
           .filter((pull) => pull.data.title.includes("RFC"))
-          .map((pull) => {
-            return this.octokit.pulls.listCommits({
-              owner: process.env.VUE_APP_ORGANISATION,
-              repo: pull.repo,
-              pull_number: pull.id,
-              per_page: 50, // Verify is 50 enough
-            });
+          .map((pull, index) => {
+            return {
+              ...pull,
+              commits: commits[index],
+            };
           });
 
-        const commits = await Promise.allSettled(commitsPromises);
-        sessionStorage.setItem(
-          "cachedCommits",
-          JSON.stringify(commits.map((commit) => commit.value.data))
+        // Request labels
+        const labels = ["STAGE-1", "STAGE-2", "STAGE-3"];
+
+        const requestsData = this.$store.state.cachedIssues.find(
+          (repo) => repo.repo === "Requests"
         );
-      }
 
-      return JSON.parse(sessionStorage.getItem("cachedCommits"));
-    },
-    async getInitialData() {
-      const commits = await this.prepareCommits();
-      const aggregator = this.$store.state.cachedPullRequests
-        .filter((pull) => pull.data.title.includes("RFC"))
-        .map((pull, index) => {
-          return {
-            ...pull,
-            commits: commits[index],
-          };
-        });
+        if (!requestsData) {
 
-      // Request labels
-      const labels = ["STAGE-1", "STAGE-2", "STAGE-3"];
+          this.showAlert(
+            `Your organisation doesn't have Requests repository`,
+            `Requests repository is required for Sanity work.`,
+            'warning',
+          );
 
-      const requestsData = this.$store.state.cachedIssues.find(
-        (repo) => repo.repo === "Requests"
-      );
+          return false;
+        }
 
-      if (requestsData) {
         const requestsDataFiltered = requestsData.data.filter(
           (issue) =>
             issue.labels.filter((label) => labels.includes(label.name)).length
@@ -99,10 +99,60 @@ export default {
             commits: matchedPRs.map((pr) => pr.commits).flat(),
           };
         });
-      } else {
-        this.error.show = true;
+
+        this.showSpinner = false;
+      } catch(error) {
+        this.showAlert(
+          `An error has occured with the data fetch`,
+          `Please try again in a few minutes.`,
+          'error'
+        );
+
+        return;
+      }
+    },
+    async prepareCommits() {
+      try {
+
+        if (!sessionStorage.getItem("cachedCommits")) {
+          const commitsPromises = this.$store.state.cachedPullRequests
+            .filter((pull) => pull.data.title.includes("RFC"))
+            .map((pull) => {
+              return this.octokit.pulls.listCommits({
+                owner: process.env.VUE_APP_ORGANISATION,
+                repo: pull.repo,
+                pull_number: pull.id,
+                per_page: 50,
+              });
+            });
+
+          const commits = await Promise.allSettled(commitsPromises);
+          sessionStorage.setItem(
+            "cachedCommits",
+            JSON.stringify(commits.map((commit) => commit.value.data))
+          );
+        }
+
+      } catch(error) {
+
+        this.showAlert(
+          `An error has occured with the data fetch`,
+          `Please try again in a few minutes.`,
+          'error'
+        );
+
+        return;
       }
 
+      return JSON.parse(sessionStorage.getItem("cachedCommits"));
+    },
+    showAlert(title, message, type) {
+      this.error.title = title ?? this.error.title;
+      this.error.message = message ?? this.error.message;
+      this.error.type = type ?? this.error.type;
+
+      this.showSpinner = false;
+      this.error.show = true;
     },
   },
 };

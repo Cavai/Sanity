@@ -1,13 +1,10 @@
+<!-- TODO -->
 <template>
   <div id="horizon-timeline">
     <Timeline>
-      <TimelineItem color="green">
-        <Icon type="ios-trophy" slot="dot"></Icon>
-        <span>发布里程碑版本</span>
-      </TimelineItem>
-      <TimelineItem>发布1.0版本</TimelineItem>
-      <TimelineItem>发布2.0版本</TimelineItem>
-      <TimelineItem>发布3.0版本</TimelineItem>
+      <TimelineItem>1</TimelineItem>
+      <TimelineItem>2</TimelineItem>
+      <TimelineItem>3</TimelineItem>
     </Timeline>
   </div>
 </template>

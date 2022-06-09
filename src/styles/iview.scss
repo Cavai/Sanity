@@ -87,8 +87,22 @@ i.ivu-icon-ios-funnel.on {
   border: none !important;
 }
 
-.ivu-tabs {
+.ivu-select-selection-focused,
+.ivu-select-selection:hover,
+.ivu-select-visible .ivu-select-selection,
+.ivu-input:hover,
+.ivu-date-picker-focused input:not([disabled]),
+.ivu-input:focus {
+  border-color: #202020;
+}
 
+.ivu-select-visible .ivu-select-selection,
+.ivu-date-picker-focused input:not([disabled]),
+.ivu-input:focus {
+  box-shadow: none !important;
+}
+
+.ivu-tabs {
   font-family: "Noto Sans", sans-serif !important;
   color: #0b8eba !important;
   font-size: 13px;
@@ -106,10 +120,6 @@ i.ivu-icon-ios-funnel.on {
   .ivu-tabs-tab-active,
   .ivu-tabs-nav .ivu-tabs-tab:hover {
     color: #0b8eba !important;
-  }
-
-  .ivu-select-selection-focused, .ivu-select-selection:hover {
-    border-color: #0b8eba;
   }
 
   .ivu-tabs-tab {

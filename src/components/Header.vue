@@ -7,7 +7,7 @@
       <router-link to="/requests">Requests</router-link>
       <router-link to="/stream">Stream</router-link>
       <router-link to="/horizon">Horizon</router-link>
-      <router-link to="/utils">Utils</router-link>
+      <!-- <router-link to="/utils">Utils</router-link> -->
     </nav>
     <div class="header-right">
       <div v-if="exportAvailable" class="header-export">
@@ -36,7 +36,9 @@ export default {
   mixins: [notifications],
   computed: {
     exportAvailable() {
-      return this.$route.name !== "Utils";
+      // TODO
+      return false;
+      // return this.$route.name !== "Utils";
     },
   },
   methods: {

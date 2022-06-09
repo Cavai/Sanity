@@ -1,12 +1,15 @@
 <template>
   <div id="login">
-    <Spinner v-if="loadingData" />
-    <div v-if="isNotOrganisationMember" class="error_container">
-      <Alert type="error" show-icon>
-        You're not recognized as {{ organisationName }} organisation member
-        <span slot="desc"> Please contact your line manager. </span>
-      </Alert>
-    </div>
+    <Spinner v-if="showSpinner" />
+    <Alert
+      v-if="error.show"
+      :type="error.type"
+      show-icon
+      class="error_container"
+    >
+      {{ error.title }}
+      <span slot="desc">{{ error.message }}</span>
+    </Alert>
     <div class="sign_in_container">
       <div class="sign_in_left">
         <h1>Sign in</h1>
@@ -40,10 +43,16 @@ export default {
   },
   data() {
     return {
-      loadingData: false,
+      error: {
+        show: false,
+        title: "Service temporarily unavailable",
+        message: "Please try again in a few minutes.",
+        type: "error",
+      },
       firebaseInitialized: false,
       firebaseInstance: null,
       isNotOrganisationMember: false,
+      showSpinner: false,
     };
   },
   computed: {
@@ -79,11 +88,11 @@ export default {
         .auth()
         .signInWithPopup(provider)
         .then((result) => {
-          this.loadingData = true;
+          this.showSpinner = true;
 
           const octokit = new Octokit({
             auth: result.credential.accessToken,
-            userAgent: "Cavai Sanity v0.1",
+            userAgent: "Sanity v0.1",
           });
 
           octokit.orgs
@@ -92,8 +101,6 @@ export default {
               username: result.additionalUserInfo.username,
             })
             .then(() => {
-              this.isNotOrganisationMember = false;
-
               this.$store.commit("authenticateUser", {
                 login: result.additionalUserInfo.username,
                 display: result.user.displayName,
@@ -105,15 +112,28 @@ export default {
             })
             .catch((error) => {
               console.error("User membership error: ", error.message);
-              this.loadingData = false;
-              this.isNotOrganisationMember = true;
+              this.showSpinner = false;
+
+              this.showAlert(
+                `You're not recognized as ${this.organisationName} organisation member`,
+                'Please contact your line manager',
+                'error'
+              )
             });
         });
+    },
+    showAlert(title, message, type) {
+      this.error.title = title ?? this.error.title;
+      this.error.message = message ?? this.error.message;
+      this.error.type = type ?? this.error.type;
+
+      this.showSpinner = false;
+      this.error.show = true;
     },
     prepareToken() {
       const octokit = new Octokit({
         auth: process.env.VUE_APP_GH_TOKEN,
-        userAgent: "Cavai Sanity v0.1",
+        userAgent: "Sanity v0.1",
       });
 
       octokit.rateLimit.get().then(({ data }) => {
@@ -126,95 +146,141 @@ export default {
           // Main token
           this.$store.commit("setToken", process.env.VUE_APP_GH_TOKEN);
         } else {
-          // Alternative token (TODO: update logic)
+          // Alternative token
           this.$store.commit("setToken", process.env.VUE_APP_GH_TOKEN_ALT);
         }
-        this.preCacheData(octokit);
+
+        this.preCacheData(
+          new Octokit({
+            auth: this.$store.state.authenticationToken,
+            userAgent: "Sanity v0.1",
+          })
+        );
       });
     },
     async preCacheData(octokit) {
       // Users
-      const { data: users } = await octokit.orgs.listMembers({
-        org: process.env.VUE_APP_ORGANISATION,
-        per_page: 100,
-      });
+      try {
 
-      this.$store.commit("setCachedUsers", users);
+        const { data: users } = await octokit.orgs.listMembers({
+          org: process.env.VUE_APP_ORGANISATION,
+          per_page: 100,
+        });
+
+        this.$store.commit(
+          "setCachedUsers",
+          users.sort((a, b) =>
+            a.login.toLowerCase().localeCompare(b.login.toLowerCase())
+          )
+        );
+
+      } catch(error) {
+
+        this.showAlert(
+          `An error has occured with the data fetch`,
+          `Please try again in a few minutes.`,
+          'error'
+        );
+
+        this.$store.commit("logoutUser");
+
+        return;
+      }
 
       // Repositories
-      const { data: repos } = await octokit.repos.listForOrg({
-        org: process.env.VUE_APP_ORGANISATION,
-        per_page: 100,
-      });
+      try {
 
-      this.$store.commit('setCachedRepositories', repos);
-
-      const pullsPromises = repos.map((repo) => {
-        return octokit.pulls.list({
-          owner: process.env.VUE_APP_ORGANISATION,
-          repo: repo.name,
-          state: "open",
+        const { data: repos } = await octokit.repos.listForOrg({
+          org: process.env.VUE_APP_ORGANISATION,
           per_page: 100,
         });
-      });
 
-      const closedPullsPromises = repos.map((repo) => {
-        return octokit.pulls.list({
-          owner: process.env.VUE_APP_ORGANISATION,
-          repo: repo.name,
-          state: "closed",
-          per_page: 100,
-        });
-      });
+        this.$store.commit(
+          "setCachedRepositories",
+          repos.sort((a, b) =>
+            a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+          )
+        );
 
-      const issuesPromises = repos.map((repo) => {
-        return octokit.issues.listForRepo({
-          owner: process.env.VUE_APP_ORGANISATION,
-          repo: repo.name,
-          per_page: 100,
-        });
-      });
-
-      // PRs
-      const pulls = await Promise.allSettled(pullsPromises);
-      const closedPulls = await Promise.allSettled(closedPullsPromises);
-
-      const pullsFiltered = [...pulls, ...closedPulls]
-        .map((pullData) => {
-          if (pullData.value.data.length) {
-            return pullData.value.data.map((pull) => {
-              return {
-                id: pull.number,
-                repo: pull.base.repo.name,
-                url: pull.url,
-                data: pull,
-              };
-            });
-          }
-        })
-        .filter((pulls) => pulls)
-        .flat()
-        .filter((pull) => {
-          return pull.data.state === "open" || pull.data.title.includes("RFC");
+        const pullsPromises = repos.map((repo) => {
+          return octokit.pulls.list({
+            owner: process.env.VUE_APP_ORGANISATION,
+            repo: repo.name,
+            state: "open",
+            per_page: 100,
+          });
         });
 
-      this.$store.commit("setCachedPulls", pullsFiltered);
+        const closedPullsPromises = repos.map((repo) => {
+          return octokit.pulls.list({
+            owner: process.env.VUE_APP_ORGANISATION,
+            repo: repo.name,
+            state: "closed",
+            per_page: 100,
+          });
+        });
 
-      // Issues
-      const issues = await Promise.allSettled(issuesPromises);
-      const issuesFiltered = issues.map((issue) => {
-        return {
-          repo: issue.value.url
-            .split(`${process.env.VUE_APP_ORGANISATION}/`)[1]
-            .split("/issues")[0],
-          url: issue.value.url,
-          data: issue.value.data,
-        };
-      });
+        const issuesPromises = repos.map((repo) => {
+          return octokit.issues.listForRepo({
+            owner: process.env.VUE_APP_ORGANISATION,
+            repo: repo.name,
+            per_page: 100,
+          });
+        });
 
-      this.$store.commit("setCachedIssues", issuesFiltered);
+        // PRs
+        const pulls = await Promise.allSettled(pullsPromises);
+        const closedPulls = await Promise.allSettled(closedPullsPromises);
 
-      this.loadingData = false;
+        const pullsFiltered = [...pulls, ...closedPulls]
+          .map((pullData) => {
+            if (pullData.value.data.length) {
+              return pullData.value.data.map((pull) => {
+                return {
+                  id: pull.number,
+                  repo: pull.base.repo.name,
+                  url: pull.url,
+                  data: pull,
+                };
+              });
+            }
+          })
+          .filter((pulls) => pulls)
+          .flat()
+          .filter((pull) => {
+            return pull.data.state === "open" || pull.data.title.includes("RFC");
+          });
+
+        this.$store.commit("setCachedPulls", pullsFiltered);
+
+        // Issues
+        const issues = await Promise.allSettled(issuesPromises);
+        const issuesFiltered = issues.map((issue) => {
+          return {
+            repo: issue.value.url
+              .split(`${process.env.VUE_APP_ORGANISATION}/`)[1]
+              .split("/issues")[0],
+            url: issue.value.url,
+            data: issue.value.data,
+          };
+        });
+
+        this.$store.commit("setCachedIssues", issuesFiltered);
+
+      } catch(error) {
+
+        this.showAlert(
+          `An error has occured with the data fetch`,
+          `Please try again in a few minutes.`,
+          'error'
+        );
+
+        this.$store.commit("logoutUser");
+
+        return;
+      }
+
+      this.showSpinner = false;
 
       if (this.$route.query.to) {
         this.$router.push(`/${this.$route.query.to}`);

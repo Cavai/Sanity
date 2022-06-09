@@ -24,9 +24,14 @@
         <span style="display: flex; align-items: center" v-if="row.commitData">
           <Avatar :src="row.commitData.author.avatar" size="small" />
           &nbsp;
-          <strong class="engineer-login">{{
-            row.commitData.author.login
-          }}</strong>
+          <router-link
+            tag="strong"
+            class="engineer-login"
+            style="cursor: pointer;"
+            :to="`/horizon/${row.commitData.author.login.toLowerCase()}`"
+          >
+            {{ row.commitData.author.login }}
+          </router-link>
           &nbsp;
           <Tooltip :content="row.commitData.timestamp">
             <a :href="row.url" target="_blank">
@@ -93,7 +98,9 @@
         </div>
         <Tooltip content="Repository" v-if="row.stage === null">
           <span v-if="row.commitData">
-            <Icon type="md-folder" /> {{ row.commitData.repo }}
+            <Icon type="md-folder" />
+            &nbsp;
+            <a :href="row.commitData.repo_url" target="_blank">{{ row.commitData.repo }}</a>
           </span>
         </Tooltip>
       </template>
@@ -101,7 +108,14 @@
         <div class="engineers-container" v-if="row.engineers !== null">
           <div v-for="engineer in row.engineers" :key="engineer.login">
             <Avatar :src="engineer.avatar_url" size="small" />
-            <span class="engineer-login">{{ engineer.login }}</span>
+            <router-link
+              tag="span"
+              class="engineer-login"
+              style="cursor: pointer;"
+              :to="`/horizon/${engineer.login.toLowerCase()}`"
+            >
+              {{ engineer.login }}
+            </router-link>
           </div>
         </div>
       </template>
@@ -135,9 +149,14 @@ export default {
   created() {
     this.tableData = [
       ...this.rawData.map((request) => {
-        const workPhases = request.body.split("# Work Phases")[1];
-        const tasksDone = this.countInString("- [x]", workPhases);
-        const tasksNotDone = this.countInString("- [ ]", workPhases);
+        let tasksDone = 0,
+          tasksNotDone = 0;
+
+        if (request.body) {
+          const workPhases = request.body.split("# Work Phases")[1];
+          tasksDone = this.countInString("- [x]", workPhases);
+          tasksNotDone = this.countInString("- [ ]", workPhases);
+        }
 
         const commits =
           request.commits.length &&
@@ -301,8 +320,6 @@ export default {
         backgroundColor: value,
         borderColor: value === "#ffffff" ? "gray" : "transparent",
         color: isDarkColor(value) || color === "ff0ea7" ? "white" : "black",
-        width:
-          name.length > 20 ? `${name.length * 8}px` : `${name.length * 15}px`,
       };
     },
     getStageLabelColor(stage) {
@@ -350,6 +367,9 @@ export default {
             repo: commitData.data.url
               .split(`${process.env.VUE_APP_ORGANISATION}/`)[1]
               .split("/commits")[0],
+            repo_url: `https://github.com/${process.env.VUE_APP_ORGANISATION}/${commitData.data.url
+              .split(`${process.env.VUE_APP_ORGANISATION}/`)[1]
+              .split("/commits")[0]}`
           },
         },
       ]);

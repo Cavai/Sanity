@@ -9,7 +9,7 @@ const octokit = {
   mounted() {
     this.octokit = new Octokit({
       auth: this.$store.state.authenticationToken,
-      userAgent: "Cavai Sanity v0.1",
+      userAgent: "Sanity v0.1",
     });
 
     this.octokit.rateLimit.get().then((data) => {

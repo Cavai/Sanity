@@ -1,16 +1,24 @@
 <template>
   <div id="stream">
-    <Spinner v-if="!rawData.length" />
-    <Alert v-if="error.show" type="error" show-icon class="error_container">
-      {{ error.message }}
-      <span slot="desc"> Please try again in a few minutes. </span>
+    <Spinner v-if="showSpinner && !rawData.length" />
+    <Alert
+      v-if="error.show"
+      :type="error.type"
+      show-icon
+      class="error_container"
+    >
+      {{ error.title }}
+      <span slot="desc">{{ error.message }}</span>
     </Alert>
     <Header />
     <div class="sub-header">
       <h2>Stream</h2>
     </div>
-    <div class="requests-content">
+    <div class="stream-content">
       <StreamTable v-if="rawData.length" :rawData="rawData" />
+      <span class="no-data" v-if="!showSpinner && !rawData.length"
+        >No data</span
+      >
     </div>
   </div>
 </template>
@@ -31,51 +39,81 @@ export default {
     StreamTable,
   },
   created() {
-    const pullsData = this.$store.state.cachedPullRequests
-      .map((pull) => {
-        return {
-          id: pull.id,
-          title: pull.data.title,
-          url: pull.data.html_url,
-          type: "Pull Request",
-          repository: pull.repo,
-          last_activity: moment(pull.data.updated_at).format("DD MMM YYYY"),
-          labels: pull.data.labels,
-          author: pull.data.user,
-          assignees: pull.data.assignees,
-        };
-      })
-      .filter((pull) => {
-        return !pull.author.login.includes("dependabot");
+    try {
+
+      const pullsData = this.$store.state.cachedPullRequests
+        .map((pull) => {
+          return {
+            id: pull.id,
+            title: pull.data.title,
+            url: pull.data.html_url,
+            type: "Pull Request",
+            repository: pull.repo,
+            repository_url: `https://github.com/${process.env.VUE_APP_ORGANISATION}/${pull.repo}`,
+            last_activity: moment(pull.data.updated_at).format("DD MMM YYYY"),
+            labels: pull.data.labels,
+            author: pull.data.user,
+            assignees: pull.data.assignees,
+          };
+        })
+        .filter((pull) => {
+          return !pull.author.login.includes("dependabot");
+        });
+
+      const issuesData = this.$store.state.cachedIssues.map((issues) => {
+        return issues.data.map((issue) => {
+          return {
+            id: issue.id,
+            title: issue.title,
+            url: issue.html_url,
+            type: "Issue",
+            repository: issues.repo,
+            repository_url: `https://github.com/${process.env.VUE_APP_ORGANISATION}/${issues.repo}`,
+            last_activity: moment(issue.updated_at).format("DD MMM YYYY"),
+            labels: issue.labels,
+            author: issue.user,
+            assignees: issue.assignees,
+          };
+        });
       });
 
-    const issuesData = this.$store.state.cachedIssues.map((issues) => {
-      return issues.data.map((issue) => {
-        return {
-          id: issue.id,
-          title: issue.title,
-          url: issue.html_url,
-          type: "Issue",
-          repository: issues.repo,
-          last_activity: moment(issue.updated_at).format("DD MMM YYYY"),
-          labels: issue.labels,
-          author: issue.user,
-          assignees: issue.assignees,
-        };
-      });
-    });
+      this.rawData = [...pullsData, ...issuesData.flat()];
 
-    this.rawData = [...pullsData, ...issuesData.flat()];
+    } catch(error) {
+
+      this.showAlert(
+          `An error has occured with the data fetch`,
+          `Please try again in a few minutes.`,
+          'error'
+        );
+
+        return;
+    }
+
+    this.showSpinner = false;
   },
   data() {
     return {
       error: {
         show: false,
-        message: "Service temporarily unavailable",
+        title: "Service temporarily unavailable",
+        message: "Please try again in a few minutes.",
+        type: "error",
       },
       rawData: [],
+      showSpinner: true,
     };
   },
+  methods: {
+    showAlert(title, message, type) {
+      this.error.title = title ?? this.error.title;
+      this.error.message = message ?? this.error.message;
+      this.error.type = type ?? this.error.type;
+
+      this.showSpinner = false;
+      this.error.show = true;
+    },
+  }
 };
 </script>
 
