@@ -107,6 +107,29 @@
         a {
           color: #202020;
         }
+
+        .commit-stats {
+          list-style-type: none;
+          display: flex;
+          align-items: center;
+
+          li {
+            margin: 0 5px;
+            font-family: "Noto Sans Mono", monospace;
+          }
+
+          .ivu-tooltip:not(:last-child) li {
+            &:after {
+              content: "";
+              position: absolute;
+              width: 1px;
+              height: 10px;
+              background: #e8eaec;
+
+              transform: translate(5px, 5px);
+            }
+          }
+        }
       }
     }
   }
