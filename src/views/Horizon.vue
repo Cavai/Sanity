@@ -106,9 +106,11 @@ export default {
   },
   mounted() {
     if (this.$route.params.engineer) {
-      this.selectedUser = this.$store.state.cachedUsers.find(
+      const engineer = this.$store.state.cachedUsers.find(
         (user) => this.$route.params.engineer === user.login.toLowerCase()
-      ).login;
+      );
+
+      this.selectedUser = engineer ? engineer.login : null;
 
       this.$nextTick(() => {
         this.getHorizonData();
