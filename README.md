@@ -30,6 +30,17 @@ To get started with Sanity, you will need three things:
 - A [Firebase](https://firebase.google.com/) account
 - The contents of this repo
 
+1) Create a fork of this repository to your Github organization
+2) Go to the Github organization's settings and pick `Github Apps`
+3) Configure the Cloudflare app to allow `Sanity` repo
+4) Login to your Cloudflare dashboard and go to `Pages`
+5) Create a new project and choose `Connect to Git`
+6) Choose the correct Github organization
+7) Select the `Sanity` repository
+8) Set build output directory to `/public`
+9) Add all the environment variables from [.env.example](.env.example)
+10) Deploy
+
 ## Docs
 
 No documentation available at this time.
