@@ -47,6 +47,7 @@ export default new Vuex.Store({
       state.cachedRepositories = null;
       state.cachedPullRequests = null;
       state.cachedIssues = null;
+      state.cachedLogo = null;
 
       sessionStorage.removeItem("cachedCommits");
     },
