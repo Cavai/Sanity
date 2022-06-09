@@ -69,6 +69,7 @@ export default {
           slot: "title",
           key: "title",
           sortable: true,
+          minWidth: 250,
         },
         {
           title: "Type",
