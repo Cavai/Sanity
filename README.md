@@ -27,13 +27,66 @@
 To get started with Sanity, you will need three things: 
 
 - A Github organization (can be private or public)
+- A Github OAuth App
+- A Github personal token
 - A [Firebase](https://firebase.google.com/) account
 - The contents of this repo
 
-### Creating a Firebase app (Required)
+It sounds like a lot, and there are some steps that have to be taken care before you can start using Sanity, but everything is really straightforward and should not take longer than 5 minutes to complete.
 
+### Setting up Sanity (Minimal)
+
+- Create an account in [Firebase](https://console.firebase.google.com/) if you don't already have one
+- Start by cliking `Create a project`
+- Name the project and select a resource it belongs to
+- Turn `Enable Google Analytics` on or off as per your liking
+- Once the project is created, add a web app to it
+- From the screen that opens get the following: 
+
+```
+  apiKey: "00000yA00000-OWbyZ7AnMt00000-bfR200000",
+  authDomain: "cavai-sanity-00000.firebaseapp.com",
+  projectId: "cavai-sanity-00000",
+  storageBucket: "cavai-sanity-00000.appspot.com",
+  messagingSenderId: "58213300000",
+  appId: "1:00000394149:web:00003b8088779c95a160c"
+```
+
+- The `Continue to console`
 - In `Authentication` go to `Sign-in method`
-- Under `Authorized domains` add
+- First choose Github as `Sign-in provider`
+- In the opening settings window, `Enable` Github
+- Copy the callback url below `Client ID` and `Client secret` fields
+
+Next, you have to go to Github.com to generate the OAuth credentials:
+
+- First, go to your personal `Settings`from the avatar in right top corner
+- Go to `Developer settings`
+- Choose `OAuth Apps` and create a `New OAuth App`
+- You can put any value to `Application name` and `Homepage URL` but `Authorization callback URL` must be the one you copied from Firebase in the previous steps
+- Leave `Enable Device Flow` unchecked
+- In the next window `Generate a new client secret` and copy it together with `Client ID`
+
+Now, you have to go back to Firebase to complete the setup in there: 
+
+- Add the values from Github to `Client ID` and `Client secret`
+- Add the domain you intend to use for **Sanity** (e.g. sanity.xyz.com) including localhost or other local address if you intend to use one
+
+As the last step, you have to go back to Github and create a personal token: 
+
+- First, go to your personal `Settings`from the avatar in right top corner
+- Go to `Developer settings`
+- Choose `Personal access tokens` and create a new token
+- Select `repo` as scope
+
+### Setting up Sanity locally (Optional)
+
+1) Make sure that you have **Sanity** package on the local machine
+2) Create a copy of the .env.example file called `.env.local`
+3) Fill in the values you have generated in the above section into `.env.local`
+4) Run `npm install` and then `npm run serve`
+
+You now have **Sanity** running locally on https://localhost:8080
 
 ### Setting up Sanity with Cloudflare pages (Optional)
 
