@@ -191,9 +191,27 @@ export default {
           per_page: 100,
         });
 
+        const branchesPromises = [];
+
+        repos.forEach(repo => {
+          branchesPromises.push(
+            octokit.repos.listBranches({
+              owner: process.env.VUE_APP_ORGANISATION,
+              repo: repo.name,
+            })
+          )
+        });
+
+        const branches = await Promise.all(branchesPromises);
+
         this.$store.commit(
           "setCachedRepositories",
-          repos.sort((a, b) =>
+          repos.map((repo, index) => {
+            return {
+              ...repo,
+              branches: branches[index].data
+            }
+          }).sort((a, b) =>
             a.name.toLowerCase().localeCompare(b.name.toLowerCase())
           )
         );
