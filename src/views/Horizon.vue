@@ -1,5 +1,6 @@
 <template>
   <div id="horizon">
+    <Spinner v-if="showSpinner" />
     <Alert
       v-if="error.show"
       :type="error.type"
@@ -94,6 +95,7 @@ import octokit from "@/mixins/octokit";
 import Header from "@/components/Header.vue";
 import HorizonTable from "@/components/HorizonTable.vue";
 // import HorizonTimeLine from "@/components/HorizonTimeLine.vue";
+import Spinner from "@/components/Spinner.vue";
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
@@ -103,6 +105,7 @@ export default {
     Header,
     HorizonTable,
     // HorizonTimeLine,
+    Spinner,
   },
   mounted() {
     if (this.$route.params.engineer) {
@@ -125,6 +128,7 @@ export default {
         message: "Please try again in a few minutes.",
         type: "error",
       },
+      showSpinner: false,
       paneSelected: "table",
       selectedUser: null,
       selectedRepositories: ["All"],
@@ -207,38 +211,50 @@ export default {
         return false;
       }
 
+      this.showSpinner = true;
+
       try {
+
+        this.commitsData = [];
         const commitsPromises = [];
 
         if (this.selectedRepositories[0] === "All") {
           this.$store.state.cachedRepositories.forEach((repository) => {
-            commitsPromises.push(
-              this.octokit.repos.listCommits({
-                owner: process.env.VUE_APP_ORGANISATION,
-                repo: repository.name,
-                author: this.selectedUser,
-                since: moment(this.selectedDateRange[0]).toISOString(),
-                until: moment(this.selectedDateRange[1])
-                  .add("1", "day")
-                  .toISOString(),
-                per_page: 100,
-              })
-            );
+            repository.branches.forEach((branch) => {
+              commitsPromises.push(
+                this.octokit.repos.listCommits({
+                  owner: process.env.VUE_APP_ORGANISATION,
+                  repo: repository.name,
+                  sha: branch.name,
+                  author: this.selectedUser,
+                  since: moment(this.selectedDateRange[0]).toISOString(),
+                  until: moment(this.selectedDateRange[1])
+                    .add("1", "day")
+                    .toISOString(),
+                  per_page: 100,
+                })
+              );
+            })
           });
         } else {
           this.selectedRepositories.forEach((repository) => {
-            commitsPromises.push(
-              this.octokit.repos.listCommits({
-                owner: process.env.VUE_APP_ORGANISATION,
-                repo: repository,
-                author: this.selectedUser,
-                since: moment(this.selectedDateRange[0]).toISOString(),
-                until: moment(this.selectedDateRange[1])
-                  .add("1", "day")
-                  .toISOString(),
-                per_page: 100,
-              })
-            );
+            this.$store.state.cachedRepositories
+              .find(repo => repo.name === repository).branches
+              .forEach((branch) => {
+              commitsPromises.push(
+                this.octokit.repos.listCommits({
+                  owner: process.env.VUE_APP_ORGANISATION,
+                  repo: repository,
+                  sha: branch.name,
+                  author: this.selectedUser,
+                  since: moment(this.selectedDateRange[0]).toISOString(),
+                  until: moment(this.selectedDateRange[1])
+                    .add("1", "day")
+                    .toISOString(),
+                  per_page: 100,
+                })
+              );
+            });
           });
         }
 
@@ -247,12 +263,17 @@ export default {
         this.commitsData = commits.map((repo) => {
           return {
             commits: repo.value.data,
+            branch: repo.value.url
+                      .split("sha=")[1]
+                      .split("&author")[0],
             repo: repo.value.url
               .split(`${process.env.VUE_APP_ORGANISATION}/`)[1]
               .split("/commits")[0],
           };
         });
+
       } catch (error) {
+
         this.showAlert(
           `An error has occured with the data fetch`,
           `Please try again in a few minutes.`,
@@ -261,6 +282,8 @@ export default {
 
         return;
       }
+
+      this.showSpinner = false;
     },
     showAlert(title, message, type) {
       this.error.title = title ?? this.error.title;

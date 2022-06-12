@@ -14,7 +14,11 @@ const octokit = {
 
     this.octokit.rateLimit.get().then((data) => {
       if (data.data.resources.core.used > data.data.resources.core.limit) {
-        this.error = { ...this.error, show: true };
+        this.showAlert(
+          `Service temporarily unavailable`,
+          `Please try again in a few minutes.`,
+          "error"
+        );
       } else {
         if (this.getInitialData) {
           this.getInitialData();
