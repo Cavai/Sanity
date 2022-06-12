@@ -17,7 +17,7 @@ jobs:
       with:
         ref:  sanity-latest
         # REQUIRED if your upstream repo is private (see wiki)
-        persist-credentials: false
+        persist-credentials: true
 
     - name: Sync upstream changes
       id: sync
