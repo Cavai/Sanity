@@ -24,10 +24,10 @@ jobs:
       uses: aormsby/Fork-Sync-With-Upstream-action@v3.2
       with:
         target_sync_branch: sanity-latest
-        target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+        target_repo_token: ${{ secrets.GIT_TOKEN }}
         upstream_sync_branch: main
         upstream_sync_repo: Cavai/Sanity
-        upstream_repo_access_token: ${{ secrets.GITHUB_TOKEN }}
+        upstream_repo_access_token: ${{ secrets.GIT_TOKEN }}
 
         # Set test_mode true to run tests instead of the true action!!
         test_mode: false
