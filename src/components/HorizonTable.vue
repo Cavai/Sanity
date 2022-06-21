@@ -11,6 +11,9 @@
           {{ row.commit }}
         </a>
       </template>
+      <template slot-scope="{ row }" slot="branch">
+        <a :href="row.branch_url" target="_blank">{{ row.branch }}</a>
+      </template>
       <template slot-scope="{ row }" slot="repository">
         <a :href="row.repository_url" target="_blank">{{ row.repository }}</a>
       </template>
@@ -47,7 +50,7 @@ export default {
   async mounted() {
     const commits = this.commitsData
       .map((repo) =>
-        repo.commits.map((commit) => ({ ...commit, repo: repo.repo }))
+        repo.commits.map((commit) => ({ ...commit, branch: repo.branch, repo: repo.repo }))
       )
       .flat()
       .map((commit) => {
@@ -58,6 +61,8 @@ export default {
           url: commit.html_url,
           repository: commit.repo,
           repository_url: `https://github.com/${process.env.VUE_APP_ORGANISATION}/${commit.repo}`,
+          branch: commit.branch,
+          branch_url: `https://github.com/${process.env.VUE_APP_ORGANISATION}/${commit.repo}/tree/${commit.branch}`
         };
       });
 
@@ -105,6 +110,13 @@ export default {
           key: "commit",
           slot: "commit",
           minWidth: 300,
+        },
+        {
+          title: "Branch",
+          key: "branch",
+          slot: "branch",
+          sortable: true,
+          width: 250,
         },
         {
           title: "Repository",
