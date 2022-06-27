@@ -16,7 +16,7 @@
 
 ## Background
 
-**Sanity** provides three different horizons to a software project/organization: 
+**Sanity** provides three different horizons to a software project/organization:
 
 - **Requests** - all RFCs that meet a set criteria
 - **Stream** - all Github activity of the organization
@@ -24,7 +24,7 @@
 
 ## Getting Started (takes about 5 minutes)
 
-To get started with Sanity, you will need three things: 
+To get started with Sanity, you will need three things:
 
 - A Github organization (can be private or public)
 - A Github OAuth App
@@ -46,7 +46,7 @@ It sounds like a lot, and there are some steps that have to be taken care before
 
 1.5) Once the project is created, add a web app to it
 
-1.6) From the screen that opens get the following: 
+1.6) From the screen that opens get the following:
 
 ```
   apiKey: "00000yA00000-OWbyZ7AnMt00000-bfR200000",
@@ -81,13 +81,13 @@ Next, you have to go to Github.com to generate the OAuth credentials:
 
 1.17) In the next window `Generate a new client secret` and copy it together with `Client ID`
 
-Now, you have to go back to Firebase to complete the setup in there: 
+Now, you have to go back to Firebase to complete the setup in there:
 
 1.18) Add the values from Github to `Client ID` and `Client secret`
 
 1.19) Add the domain you intend to use for **Sanity** (e.g. sanity.xyz.com) including localhost or other local address if you intend to use one
 
-As the last step, you have to go back to Github and create a personal token: 
+As the last step, you have to go back to Github and create a personal token:
 
 1.20) First, go to your personal `Settings`from the avatar in right top corner
 
@@ -97,7 +97,7 @@ As the last step, you have to go back to Github and create a personal token:
 
 1.23) Select `repo` as scope
 
-### 2. Running Sanity 
+### 2. Running Sanity
 
 #### 2.1. Locally
 

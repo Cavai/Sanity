@@ -41,11 +41,21 @@
     font-weight: 500;
   }
 
+  nav a:first-of-type {
+    padding-left: 0px;
+    margin-left: 15px;
+  }
+
   .header-export,
   .header-user {
     margin-right: 25px;
     span {
       cursor: pointer;
     }
+  }
+
+  .header-user {
+    padding-right: 0px;
+    margin-right: 20px;
   }
 }

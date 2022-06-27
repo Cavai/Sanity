@@ -1,8 +1,8 @@
 <template>
   <Col class="demo-spin-col" span="8">
-      <Spin fix>
-          <Icon type="ios-loading" :size="48" class="demo-spin-icon-load"></Icon>
-      </Spin>
+    <Spin fix>
+      <Icon type="ios-loading" :size="48" class="demo-spin-icon-load"></Icon>
+    </Spin>
   </Col>
 </template>
 
@@ -23,13 +23,19 @@ export default {
   z-index: 99999;
 }
 
-.demo-spin-icon-load{
+.demo-spin-icon-load {
   animation: ani-demo-spin 1s linear infinite;
   color: #202020;
 }
 @keyframes ani-demo-spin {
-  from { transform: rotate(0deg);}
-  50%  { transform: rotate(180deg);}
-  to   { transform: rotate(360deg);}
+  from {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

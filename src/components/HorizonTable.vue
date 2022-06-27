@@ -50,7 +50,11 @@ export default {
   async mounted() {
     const commits = this.commitsData
       .map((repo) =>
-        repo.commits.map((commit) => ({ ...commit, branch: repo.branch, repo: repo.repo }))
+        repo.commits.map((commit) => ({
+          ...commit,
+          branch: repo.branch,
+          repo: repo.repo,
+        }))
       )
       .flat()
       .map((commit) => {
@@ -62,9 +66,16 @@ export default {
           repository: commit.repo,
           repository_url: `https://github.com/${process.env.VUE_APP_ORGANISATION}/${commit.repo}`,
           branch: commit.branch,
-          branch_url: `https://github.com/${process.env.VUE_APP_ORGANISATION}/${commit.repo}/tree/${commit.branch}`
+          branch_url: `https://github.com/${process.env.VUE_APP_ORGANISATION}/${commit.repo}/tree/${commit.branch}`,
         };
-      });
+      })
+      .sort((commit) => {
+        return commit.branch === "main" || commit.branch === "master" ? 1 : -1;
+      })
+      .filter(
+        (commit, index, commits) =>
+          commits.findIndex((commit2) => commit2.sha === commit.sha) === index
+      );
 
     const commitsDetailsPromises = [];
 
@@ -116,6 +127,18 @@ export default {
           key: "branch",
           slot: "branch",
           sortable: true,
+          filters: [
+            ...new Set(this.commitsData.map((entry) => entry.branch)),
+          ].map((branch) => {
+            return {
+              label: branch,
+              value: branch,
+            };
+          }),
+          filterMultiple: true,
+          filterMethod(value, row) {
+            return row.branch === value;
+          },
           width: 250,
         },
         {
@@ -123,6 +146,18 @@ export default {
           key: "repository",
           slot: "repository",
           sortable: true,
+          filters: [
+            ...new Set(this.commitsData.map((entry) => entry.repo)),
+          ].map((repository) => {
+            return {
+              label: repository,
+              value: repository,
+            };
+          }),
+          filterMultiple: true,
+          filterMethod(value, row) {
+            return row.repository === value;
+          },
           width: 250,
         },
         {

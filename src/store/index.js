@@ -76,6 +76,6 @@ export default new Vuex.Store({
     },
     setCachedLogo: (state, logo) => {
       state.cachedLogo = logo;
-    }
+    },
   },
 });

@@ -214,7 +214,6 @@ export default {
       this.showSpinner = true;
 
       try {
-
         this.commitsData = [];
         const commitsPromises = [];
 
@@ -234,27 +233,27 @@ export default {
                   per_page: 100,
                 })
               );
-            })
+            });
           });
         } else {
           this.selectedRepositories.forEach((repository) => {
             this.$store.state.cachedRepositories
-              .find(repo => repo.name === repository).branches
-              .forEach((branch) => {
-              commitsPromises.push(
-                this.octokit.repos.listCommits({
-                  owner: process.env.VUE_APP_ORGANISATION,
-                  repo: repository,
-                  sha: branch.name,
-                  author: this.selectedUser,
-                  since: moment(this.selectedDateRange[0]).toISOString(),
-                  until: moment(this.selectedDateRange[1])
-                    .add("1", "day")
-                    .toISOString(),
-                  per_page: 100,
-                })
-              );
-            });
+              .find((repo) => repo.name === repository)
+              .branches.forEach((branch) => {
+                commitsPromises.push(
+                  this.octokit.repos.listCommits({
+                    owner: process.env.VUE_APP_ORGANISATION,
+                    repo: repository,
+                    sha: branch.name,
+                    author: this.selectedUser,
+                    since: moment(this.selectedDateRange[0]).toISOString(),
+                    until: moment(this.selectedDateRange[1])
+                      .add("1", "day")
+                      .toISOString(),
+                    per_page: 100,
+                  })
+                );
+              });
           });
         }
 
@@ -263,17 +262,13 @@ export default {
         this.commitsData = commits.map((repo) => {
           return {
             commits: repo.value.data,
-            branch: repo.value.url
-                      .split("sha=")[1]
-                      .split("&author")[0],
+            branch: repo.value.url.split("sha=")[1].split("&author")[0],
             repo: repo.value.url
               .split(`${process.env.VUE_APP_ORGANISATION}/`)[1]
               .split("/commits")[0],
           };
         });
-
       } catch (error) {
-
         this.showAlert(
           `An error has occured with the data fetch`,
           `Please try again in a few minutes.`,

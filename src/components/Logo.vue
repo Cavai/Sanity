@@ -1,8 +1,12 @@
 <template>
   <transition name="fade">
-  <div v-if="logoSrc" class="logo" :style="{ height: `${size}px`, width: `${size}px` }">
-    <img :height="size" :width="size" :src="logoSrc" />
-  </div>
+    <div
+      v-if="logoSrc"
+      class="logo"
+      :style="{ height: `${size}px`, width: `${size}px` }"
+    >
+      <img :height="size" :width="size" :src="logoSrc" />
+    </div>
   </transition>
 </template>
 
@@ -20,8 +24,8 @@ export default {
   },
   data() {
     return {
-      logoSrc: '',
-    }
+      logoSrc: "",
+    };
   },
   async created() {
     if (this.$store.state.cachedLogo) {
@@ -42,12 +46,11 @@ export default {
         this.logoSrc = orgData.data.avatar_url;
       }
 
-      this.$store.commit('setCachedLogo', this.logoSrc);
+      this.$store.commit("setCachedLogo", this.logoSrc);
     }
-
 
     const favicon = document.getElementById("favicon");
     favicon.href = this.logoSrc;
-  }
+  },
 };
 </script>

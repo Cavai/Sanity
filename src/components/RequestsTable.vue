@@ -90,10 +90,10 @@
           <div
             class="label"
             :style="
-              generateLabelStyles(row.stage, getStageLabelColor(row.stage))
+              generateLabelStyles(row.stage.name, row.stage.color)
             "
           >
-            {{ row.stage }}
+            {{ row.stage.name }}
           </div>
         </div>
         <Tooltip content="Repository" v-if="row.stage === null">
@@ -175,8 +175,12 @@ export default {
           last_commit: commits ? moment(commits[0]).format("DD MMM YYYY") : "-",
           tasks_done: tasksDone,
           tasks_not_done: tasksNotDone,
-          stage: request.labels.find((label) => label.name.includes("STAGE"))
-            .name,
+          stage: {
+            name: request.labels.find((label) => label.name.includes("STAGE"))
+              .name,
+            color: request.labels.find((label) => label.name.includes("STAGE"))
+              .color,
+          },
           engineers: request.assignees,
           children: request.pulls.length
             ? request.pulls.map((pull) => ({
@@ -263,6 +267,10 @@ export default {
               label: "STAGE-3",
               value: "STAGE-3",
             },
+            {
+              label: "STAGE-4",
+              value: "STAGE-4",
+            },
           ],
           filterMultiple: true,
           filterMethod(value, row) {
@@ -323,16 +331,6 @@ export default {
         borderColor: value === "#ffffff" ? "gray" : "transparent",
         color: isDarkColor(value) || color === "ff0ea7" ? "white" : "black",
       };
-    },
-    getStageLabelColor(stage) {
-      switch (stage) {
-        case "STAGE-1":
-          return this.stageLabelColors[0];
-        case "STAGE-2":
-          return this.stageLabelColors[1];
-        case "STAGE-3":
-          return this.stageLabelColors[2];
-      }
     },
     async handleCommitData(item, callback) {
       const commitData = await this.octokit.repos.getCommit({
