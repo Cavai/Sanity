@@ -42,10 +42,7 @@
           class="sub-menu-repository"
         >
           <Option
-            v-for="repo in [
-              { name: 'All', id: 0 },
-              ...$store.state.cachedRepositories,
-            ]"
+            v-for="repo in [{ name: 'All', id: 0 }, ...userRepositories]"
             :value="repo.name"
             :key="repo.id"
           >
@@ -63,7 +60,7 @@
           class="sub-menu-date-picker"
         ></DatePicker>
       </FormItem>
-      <FormItem style="margin-top: 24px">
+      <FormItem style="margin-top: 23px">
         <Button
           class="sub-menu-search"
           icon="ios-search-outline"
@@ -108,6 +105,11 @@ export default {
     Spinner,
   },
   mounted() {
+    if (!this.$store.state.cachedUsers) {
+      this.getMembers();
+      return;
+    }
+
     if (this.$route.params.engineer) {
       const engineer = this.$store.state.cachedUsers.find(
         (user) => this.$route.params.engineer === user.login.toLowerCase()
@@ -115,9 +117,9 @@ export default {
 
       this.selectedUser = engineer ? engineer.login : null;
 
-      this.$nextTick(() => {
-        this.getHorizonData();
-      });
+      // this.$nextTick(() => {
+      //   this.getHorizonData();
+      // });
     }
   },
   data() {
@@ -129,11 +131,12 @@ export default {
         type: "error",
       },
       showSpinner: false,
-      paneSelected: "table",
+      // paneSelected: "table",
       selectedUser: null,
       selectedRepositories: ["All"],
+      userRepositories: [],
       selectedDateRange: [
-        moment().subtract(7, "days").format(),
+        moment().subtract(3, "days").format(),
         moment().format(),
       ],
       pickerShortcuts: {
@@ -186,6 +189,7 @@ export default {
         ],
       },
       commitsData: [],
+      rateLimit: 0,
     };
   },
   computed: {
@@ -198,6 +202,117 @@ export default {
     },
   },
   methods: {
+    async getMembers() {
+      this.showSpinner = true;
+
+      // Users
+      try {
+        const { data: users } = await this.octokit.orgs.listMembers({
+          org: process.env.VUE_APP_ORGANISATION,
+          per_page: 100,
+        });
+
+        this.$store.commit(
+          "setCachedUsers",
+          users.sort((a, b) =>
+            a.login.toLowerCase().localeCompare(b.login.toLowerCase())
+          )
+        );
+
+        this.getRepositoriesCollaborators();
+      } catch (error) {
+        this.showAlert(
+          `An error has occured with the data fetch`,
+          `Please try again in a few minutes.`,
+          "error"
+        );
+
+        this.$store.commit("logoutUser");
+
+        return;
+      }
+    },
+    async getRepositoriesCollaborators() {
+      this.octokit.rateLimit.get().then(({ data }) => {
+        this.rateLimit = data.rate.remaining;
+      });
+
+      const repositoriesCollaboratorsPromises = [];
+
+      this.$store.state.cachedRepositories.forEach((repo) => {
+        repositoriesCollaboratorsPromises.push(
+          this.octokit.repos.listCollaborators({
+            owner: process.env.VUE_APP_ORGANISATION,
+            repo: repo.name,
+            per_page: 50,
+          })
+        );
+      });
+
+      Promise.allSettled(repositoriesCollaboratorsPromises)
+        .then((collaborators) => {
+          const cachedRepos = this.$store.state.cachedRepositories;
+
+          collaborators.forEach((repository, index) => {
+            cachedRepos[index] = {
+              ...cachedRepos[index],
+              collaborators: repository.value.data,
+            };
+          });
+
+          this.$store.commit(
+            "setCachedRepositories",
+            cachedRepos.sort((a, b) =>
+              a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+            )
+          );
+
+          if (this.$route.params.engineer) {
+            const engineer = this.$store.state.cachedUsers.find(
+              (user) => this.$route.params.engineer === user.login.toLowerCase()
+            );
+
+            this.selectedUser = engineer ? engineer.login : null;
+
+            this.userRepositories = this.$store.state.cachedRepositories.filter(
+              (repository) => {
+                return repository.collaborators
+                  .map((collaborator) => collaborator.login)
+                  .includes(this.$store.state.user.login);
+              }
+            );
+
+            // this.$nextTick(() => {
+            //   this.getHorizonData();
+            // });
+          }
+
+          this.octokit.rateLimit.get().then(({ data }) => {
+            console.log(
+              `%c ** REMAINING RATE LIMIT ${data.rate.remaining} **`,
+              "background: #0D47A1; color: #FFFFFF"
+            );
+
+            console.log(
+              `%c ** COLLABORATORS DATA FETCHING COST ${
+                this.rateLimit - data.rate.remaining
+              } **`,
+              "background: #0DA12F; color: #FFFFFF"
+            );
+          });
+
+          this.showSpinner = false;
+        })
+        .catch(() => {
+          this.showAlert(
+            `An error has occured with the data fetch`,
+            `Please try again in a few minutes.`,
+            "error"
+          );
+
+          return;
+        });
+    },
     maxTagPlaceholder(num) {
       return `+${num} more`;
     },
@@ -211,9 +326,17 @@ export default {
         return false;
       }
 
+      this.octokit.rateLimit.get().then(({ data }) => {
+        this.rateLimit = data.rate.remaining;
+      });
+
       this.showSpinner = true;
 
       try {
+        this.octokit.rateLimit.get().then(({ data }) => {
+          this.rateLimit = data.rate.remaining;
+        });
+
         this.commitsData = [];
         const commitsPromises = [];
 
@@ -268,6 +391,20 @@ export default {
               .split("/commits")[0],
           };
         });
+
+        this.octokit.rateLimit.get().then(({ data }) => {
+          console.log(
+            `%c ** REMAINING RATE LIMIT ${data.rate.remaining} **`,
+            "background: #0D47A1; color: #FFFFFF"
+          );
+
+          console.log(
+            `%c ** COMMITS DATA FETCHING COST ${
+              this.rateLimit - data.rate.remaining
+            } **`,
+            "background: #0DA12F; color: #FFFFFF"
+          );
+        });
       } catch (error) {
         this.showAlert(
           `An error has occured with the data fetch`,
@@ -302,6 +439,15 @@ export default {
       if (newVal.length > 1 && newVal.includes("All")) {
         this.selectedRepositories = ["All"];
       }
+    },
+    selectedUser(user) {
+      this.userRepositories = this.$store.state.cachedRepositories.filter(
+        (repository) => {
+          return repository.collaborators
+            .map((collaborator) => collaborator.login)
+            .includes(user);
+        }
+      );
     },
   },
 };

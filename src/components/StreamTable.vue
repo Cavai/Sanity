@@ -13,7 +13,7 @@
             v-for="label in row.labels"
             :key="label.id"
             class="label"
-            :style="generateLabelStyles(label.name, label.color)"
+            :style="generateLabelStyles(label.color)"
           >
             {{ getLabelName(label.name) }}
           </div>
@@ -198,7 +198,7 @@ export default {
     },
   },
   methods: {
-    generateLabelStyles(name, color) {
+    generateLabelStyles(color) {
       const value = `#${color}`;
       return {
         backgroundColor: value,

@@ -1,6 +1,6 @@
 <template>
   <trend
-    :data="generateRandomValues"
+    :data="generateValues"
     gradientDirection="top"
     :gradient="['#679973', '#A6E6B3']"
     :padding="8"
@@ -34,7 +34,7 @@ export default {
     };
   },
   computed: {
-    generateRandomValues() {
+    generateValues() {
       if (this.commits.length) {
         return [0, ...this.sparkData];
       } else {

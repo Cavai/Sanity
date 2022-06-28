@@ -53,6 +53,7 @@ export default {
       firebaseInstance: null,
       isNotOrganisationMember: false,
       showSpinner: false,
+      rateLimit: 0,
     };
   },
   computed: {
@@ -138,16 +139,23 @@ export default {
 
       octokit.rateLimit.get().then(({ data }) => {
         console.log(
-          `%c ** REMAINING RATE LIMIT ${data.rate.remaining} **`,
+          `%c ** APP START - REMAINING RATE LIMIT ${data.rate.remaining} **`,
           "background: #0D47A1; color: #FFFFFF"
         );
 
-        if (data.rate.remaining >= 1500) {
+        if (data.rate.remaining >= 500) {
           // Main token
           this.$store.commit("setToken", process.env.VUE_APP_GH_TOKEN);
         } else {
-          // Alternative token
-          this.$store.commit("setToken", process.env.VUE_APP_GH_TOKEN_ALT);
+          this.showAlert(
+            `Service currently unavailable.`,
+            `Please try again in a few minutes.`,
+            "error"
+          );
+          return;
+
+          // Alternative token (TODO: Separate tokens PRE-CACHING <-> HORIZON)
+          // this.$store.commit("setToken", process.env.VUE_APP_GH_TOKEN_ALT);
         }
 
         this.preCacheData(
@@ -159,30 +167,9 @@ export default {
       });
     },
     async preCacheData(octokit) {
-      // Users
-      try {
-        const { data: users } = await octokit.orgs.listMembers({
-          org: process.env.VUE_APP_ORGANISATION,
-          per_page: 100,
-        });
-
-        this.$store.commit(
-          "setCachedUsers",
-          users.sort((a, b) =>
-            a.login.toLowerCase().localeCompare(b.login.toLowerCase())
-          )
-        );
-      } catch (error) {
-        this.showAlert(
-          `An error has occured with the data fetch`,
-          `Please try again in a few minutes.`,
-          "error"
-        );
-
-        this.$store.commit("logoutUser");
-
-        return;
-      }
+      octokit.rateLimit.get().then(({ data }) => {
+        this.rateLimit = data.rate.remaining;
+      });
 
       // Repositories
       try {
@@ -284,6 +271,18 @@ export default {
         });
 
         this.$store.commit("setCachedIssues", issuesFiltered);
+
+        octokit.rateLimit.get().then(({ data }) => {
+          console.log(
+            `%c ** REMAINING RATE LIMIT ${data.rate.remaining} **`,
+            "background: #0D47A1; color: #FFFFFF"
+          );
+
+          console.log(
+            `%c ** PRE-CACHING COST ${this.rateLimit - data.rate.remaining} **`,
+            "background: #0DA12F; color: #FFFFFF"
+          );
+        });
       } catch (error) {
         this.showAlert(
           `An error has occured with the data fetch`,

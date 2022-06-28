@@ -12,6 +12,7 @@
 
 .ivu-table {
   border-radius: 2.5px;
+
   box-shadow: 0 4px 12px rgb(0 0 0 / 7%);
 }
 
@@ -34,13 +35,14 @@ i.ivu-icon-ios-funnel.on {
 
 .ivu-table-filter-list {
   color: #404040 !important;
+
   font-family: "Noto Sans", sans-serif !important;
   font-size: 13px !important;
   font-weight: 300 !important;
 
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.16) !important;
   border: 1px solid #d9d9d9 !important;
   border-radius: 2px !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.16) !important;
 
   .ivu-checkbox-focus {
     box-shadow: unset !important;
@@ -48,6 +50,7 @@ i.ivu-icon-ios-funnel.on {
 
   button {
     color: #0b8eba !important;
+
     font-size: 13px;
     font-weight: 600;
     text-transform: uppercase;
@@ -55,10 +58,12 @@ i.ivu-icon-ios-funnel.on {
 }
 
 .ivu-table-cell-tree {
-  float: left;
-  margin-right: 6px;
-  top: 2px;
   position: relative;
+  top: 2px;
+
+  float: left;
+
+  margin-right: 6px;
 }
 
 .ivu-table-cell-tree:not(.ivu-table-cell-tree-empty) {
@@ -73,9 +78,9 @@ i.ivu-icon-ios-funnel.on {
 }
 
 .ivu-table-cell-slot {
-  text-overflow: ellipsis;
-  white-space: nowrap;
   overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .ivu-checkbox-checked .ivu-checkbox-inner {
@@ -103,8 +108,9 @@ i.ivu-icon-ios-funnel.on {
 }
 
 .ivu-tabs {
-  font-family: "Noto Sans", sans-serif !important;
   color: #0b8eba !important;
+
+  font-family: "Noto Sans", sans-serif !important;
   font-size: 13px;
   font-weight: 400;
   text-transform: uppercase;
@@ -129,4 +135,9 @@ i.ivu-icon-ios-funnel.on {
   .ivu-tabs-bar {
     border-bottom: 1px solid #d9d9d9;
   }
+}
+
+.ivu-select-prefix {
+  position: relative;
+  top: -1px;
 }

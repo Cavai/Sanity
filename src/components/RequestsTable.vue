@@ -87,12 +87,7 @@
       </template>
       <template slot-scope="{ row }" slot="stage">
         <div class="labels-container" v-if="row.stage !== null">
-          <div
-            class="label"
-            :style="
-              generateLabelStyles(row.stage.name, row.stage.color)
-            "
-          >
+          <div class="label" :style="generateLabelStyles(row.stage.color)">
             {{ row.stage.name }}
           </div>
         </div>
@@ -324,7 +319,7 @@ export default {
 
       return results;
     },
-    generateLabelStyles(name, color) {
+    generateLabelStyles(color) {
       const value = `#${color}`;
       return {
         backgroundColor: value,
@@ -378,51 +373,30 @@ export default {
     },
     sortTable(options) {
       if (options.column.title === "Progress") {
-        if (options.order === "asc") {
-          this.tableData.sort((a, b) => {
-            let aPerc =
-              (a.tasks_done / (a.tasks_done + a.tasks_not_done)) * 100;
-            let bPerc =
-              (b.tasks_done / (b.tasks_done + b.tasks_not_done)) * 100;
+        this.tableData.sort((a, b) => {
+          let aPerc = (a.tasks_done / (a.tasks_done + a.tasks_not_done)) * 100;
+          let bPerc = (b.tasks_done / (b.tasks_done + b.tasks_not_done)) * 100;
 
-            aPerc = isNaN(aPerc) ? 0 : aPerc;
-            bPerc = isNaN(bPerc) ? 0 : bPerc;
+          aPerc = isNaN(aPerc) ? 0 : aPerc;
+          bPerc = isNaN(bPerc) ? 0 : bPerc;
 
-            return aPerc - bPerc;
-          });
-        } else if (options.order === "desc") {
-          this.tableData.sort((a, b) => {
-            let aPerc =
-              (a.tasks_done / (a.tasks_done + a.tasks_not_done)) * 100;
-            let bPerc =
-              (b.tasks_done / (b.tasks_done + b.tasks_not_done)) * 100;
-
-            aPerc = isNaN(aPerc) ? 0 : aPerc;
-            bPerc = isNaN(bPerc) ? 0 : bPerc;
-
-            return bPerc - aPerc;
-          });
-        } else {
-          this.tableData.sort((a, b) => {
-            return a.id - b.id;
-          });
-        }
+          return options.order === "asc"
+            ? aPerc - bPerc
+            : options.order === "desc"
+            ? bPerc - aPerc
+            : a.id - b.id;
+        });
       } else if (options.column.title === "Last Commit") {
-        if (options.order === "asc") {
-          this.tableData.sort((a, b) => {
-            const timeA = moment(a.last_commit).unix();
-            const timeB = moment(b.last_commit).unix();
+        this.tableData.sort((a, b) => {
+          const timeA = moment(a.last_commit).isValid()
+            ? moment(a.last_commit).unix()
+            : 0;
+          const timeB = moment(b.last_commit).isValid()
+            ? moment(b.last_commit).unix()
+            : 0;
 
-            return (timeA ? timeA : 0) - (timeB ? timeB : 0);
-          });
-        } else if (options.order === "desc") {
-          this.tableData.sort((a, b) => {
-            const timeA = moment(a.last_commit).unix();
-            const timeB = moment(b.last_commit).unix();
-
-            return (timeB ? timeB : 0) - (timeA ? timeA : 0);
-          });
-        }
+          return options.order === "asc" ? timeA - timeB : timeB - timeA;
+        });
       }
 
       this.reRenderSparkLine = !this.reRenderSparkLine;

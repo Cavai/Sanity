@@ -2,15 +2,14 @@
   width: 100vw;
   height: 100vh;
 
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
+  &,
   .sign_in_container {
     display: flex;
     justify-content: center;
     align-items: center;
+  }
 
+  .sign_in_container {
     width: 750px;
 
     .sign_in_left {
@@ -18,9 +17,9 @@
 
       h1 {
         color: #404040;
+
         font-weight: 300;
         font-size: 44px;
-
         text-align: center;
       }
     }
@@ -31,25 +30,27 @@
       .sign_in_right_card {
         display: flex;
         flex-direction: column;
-
         justify-content: space-evenly;
         align-items: center;
-
-        background: #ffffff;
-        border-radius: 2.5px;
-        box-shadow: 0 4px 12px rgb(0 0 0 / 7%);
 
         height: 200px;
         width: 300px;
 
+        background: #ffffff;
+
+        border-radius: 2.5px;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 7%);
+
         .sign_in_button {
           background: #24292e;
           color: #ffffff;
+
           border-radius: 5px;
           border-color: unset;
 
           width: 90%;
           height: 35px;
+
           margin-top: 25px;
 
           font-size: 14px;
