@@ -44,8 +44,12 @@ export default {
   },
   methods: {
     generateSparkData(dates) {
-      let firstCommit = (this.initialDates && this.initialDates[0]) || moment.min(dates.map((d) => moment(d)));
-      let lastCommit = (this.initialDates && moment(this.initialDates[1]).add(1, "days")) || moment.max(dates.map((d) => moment(d))).add(1, "days");
+      let firstCommit =
+        (this.initialDates && this.initialDates[0]) ||
+        moment.min(dates.map((d) => moment(d)));
+      let lastCommit =
+        (this.initialDates && moment(this.initialDates[1]).add(1, "days")) ||
+        moment.max(dates.map((d) => moment(d))).add(1, "days");
 
       let datesRange = [];
 

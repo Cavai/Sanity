@@ -1,6 +1,11 @@
 <template>
   <div id="stream-table">
-    <Table ref="stream-table" :columns="columns" :data="rawData" :disabled-hover="true">
+    <Table
+      ref="stream-table"
+      :columns="columns"
+      :data="rawData"
+      :disabled-hover="true"
+    >
       <template slot-scope="{ row }" slot="title">
         <a :href="row.url" target="_blank">{{ row.title }}</a>
       </template>
@@ -56,7 +61,7 @@
 import isDarkColor from "is-dark-color";
 import moment from "moment";
 
-import { EventBus } from '@/helpers/eventBus';
+import { EventBus } from "@/helpers/eventBus";
 
 import notifications from "@/mixins/notifications";
 
@@ -67,35 +72,50 @@ export default {
   props: ["rawData"],
   mixins: [notifications],
   created() {
-    EventBus.$on('export-stream', () => {
+    EventBus.$on("export-stream", () => {
       try {
-        this.$refs['stream-table'].exportCsv({
-          filename: `${process.env.VUE_APP_ORGANISATION}-STREAM-${moment().format('DD-MM-YY')}`,
-          separator: ';',
-          columns: ['title', 'type', 'repository', 'last_activity', 'labels', 'author', 'assigness'],
+        this.$refs["stream-table"].exportCsv({
+          filename: `${
+            process.env.VUE_APP_ORGANISATION
+          }-STREAM-${moment().format("DD-MM-YY")}`,
+          separator: ";",
+          columns: [
+            "title",
+            "type",
+            "repository",
+            "last_activity",
+            "labels",
+            "author",
+            "assigness",
+          ],
           data: [
             {
-              title: 'TITLE',
-              type: 'TYPE',
-              repository: 'REPOSITORY',
-              last_activity: 'LAST ACTIVITY',
-              labels: 'LABELS',
-              author: 'AUTHOR',
-              assignees: 'ASSIGNEES',
+              title: "TITLE",
+              type: "TYPE",
+              repository: "REPOSITORY",
+              last_activity: "LAST ACTIVITY",
+              labels: "LABELS",
+              author: "AUTHOR",
+              assignees: "ASSIGNEES",
             },
             ...this.rawData.map((entry) => ({
               title: entry.title,
               type: entry.type,
               repository: entry.repository,
               last_activity: entry.last_activity,
-              labels: entry.labels.map(label => label.name).join(', ') || 'N/A',
-              author: entry.author.login || 'N/A',
-              assignees: entry.assignees.map(assignee => assignee.login).join(', ') || 'N/A',
-            }))
-          ]
+              labels:
+                entry.labels.map((label) => label.name).join(", ") || "N/A",
+              author: entry.author.login || "N/A",
+              assignees:
+                entry.assignees.map((assignee) => assignee.login).join(", ") ||
+                "N/A",
+            })),
+          ],
         });
-      } catch(error) {
-        this.notificationError("An error occured during exporting table. Please try again.");
+      } catch (error) {
+        this.notificationError(
+          "An error occured during exporting table. Please try again."
+        );
       }
     });
   },

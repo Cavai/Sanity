@@ -70,11 +70,19 @@
       </FormItem>
       <FormItem class="sub-menu-sparkline-container" v-if="commitsDates.length">
         <Tooltip content="Commits over time">
-          <SparkLine :initialDates="selectedDateRange" :commits="commitsDates" :key="reRenderSparkLine" />
+          <SparkLine
+            :initialDates="selectedDateRange"
+            :commits="commitsDates"
+            :key="reRenderSparkLine"
+          />
         </Tooltip>
       </FormItem>
     </Form>
-    <HorizonTable v-if="commitsData.length" :commitsData="commitsData" :engineer="selectedUser" />
+    <HorizonTable
+      v-if="commitsData.length"
+      :commitsData="commitsData"
+      :engineer="selectedUser"
+    />
   </div>
 </template>
 
@@ -202,10 +210,11 @@ export default {
         : null;
     },
     commitsDates() {
-      return this.commitsData.map((branch) => branch.commits)
-              .flat()
-              .map((commit) => commit.commit.author.date)
-              .sort((a, b) => moment(b).format("X") - moment(a).format("X"));
+      return this.commitsData
+        .map((branch) => branch.commits)
+        .flat()
+        .map((commit) => commit.commit.author.date)
+        .sort((a, b) => moment(b).format("X") - moment(a).format("X"));
     },
   },
   methods: {
@@ -400,8 +409,6 @@ export default {
               .split("/commits")[0],
           };
         });
-
-        console.log(commits);
 
         this.octokit.rateLimit.get().then(({ data }) => {
           console.log(

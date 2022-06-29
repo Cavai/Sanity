@@ -10,7 +10,11 @@
       <!-- <router-link to="/utils">Utils</router-link> -->
     </nav>
     <div class="header-right">
-      <div @click="emitExportEvent" v-if="exportAvailable" class="header-export">
+      <div
+        @click="emitExportEvent"
+        v-if="exportAvailable"
+        class="header-export"
+      >
         <span>EXPORT <Icon size="12" type="md-download" /></span>
       </div>
       <div v-if="$store.state.user" class="header-user">
@@ -23,7 +27,7 @@
 </template>
 
 <script>
-import { EventBus } from '@/helpers/eventBus';
+import { EventBus } from "@/helpers/eventBus";
 
 import notifications from "@/mixins/notifications";
 
@@ -66,7 +70,7 @@ export default {
     },
     emitExportEvent() {
       EventBus.$emit(`export-${this.$route.name.toLowerCase()}`);
-    }
+    },
   },
 };
 </script>

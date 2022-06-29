@@ -63,7 +63,7 @@
 <script>
 import moment from "moment";
 
-import { EventBus } from '@/helpers/eventBus';
+import { EventBus } from "@/helpers/eventBus";
 
 import notifications from "@/mixins/notifications";
 import octokit from "@/mixins/octokit";
@@ -73,21 +73,21 @@ export default {
   mixins: [notifications, octokit],
   props: ["commitsData", "engineer"],
   created() {
-    console.log(this.$parent);
-
-    EventBus.$on('export-horizon', () => {
+    EventBus.$on("export-horizon", () => {
       try {
-        this.$refs['horizon-table'].exportCsv({
-          filename: `${process.env.VUE_APP_ORGANISATION}-HORIZON-${this.engineer}-${moment().format('DD-MM-YY')}`,
-          separator: ';',
-          columns: ['date', 'commit', 'branch', 'repository', 'details'],
+        this.$refs["horizon-table"].exportCsv({
+          filename: `${process.env.VUE_APP_ORGANISATION}-HORIZON-${
+            this.engineer
+          }-${moment().format("DD-MM-YY")}`,
+          separator: ";",
+          columns: ["date", "commit", "branch", "repository", "details"],
           data: [
             {
-              date: 'DATE',
-              commit: 'COMMIT',
-              branch: 'BRANCH',
-              repository: 'REPOSITORY',
-              details: 'DETAILS',
+              date: "DATE",
+              commit: "COMMIT",
+              branch: "BRANCH",
+              repository: "REPOSITORY",
+              details: "DETAILS",
             },
             ...this.tableData.map((entry) => ({
               date: entry.date,
@@ -95,11 +95,13 @@ export default {
               branch: entry.branch,
               repository: entry.repository,
               details: `+${entry.stats.additions} -${entry.stats.deletions} in ${entry.files} files`,
-            }))
-          ]
+            })),
+          ],
         });
-      } catch(error) {
-        this.notificationError("An error occured during exporting table. Please try again.");
+      } catch (error) {
+        this.notificationError(
+          "An error occured during exporting table. Please try again."
+        );
       }
     });
   },
@@ -251,10 +253,8 @@ export default {
               })
               .sort((a, b) => b.timestamp - a.timestamp);
 
-            const days = dates[0].date.diff(
-              dates[dates.length - 1].date,
-              "days"
-            ) + 1;
+            const days =
+              dates[0].date.diff(dates[dates.length - 1].date, "days") + 1;
 
             summary[key] = {
               key,
