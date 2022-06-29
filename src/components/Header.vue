@@ -10,7 +10,7 @@
       <!-- <router-link to="/utils">Utils</router-link> -->
     </nav>
     <div class="header-right">
-      <div v-if="exportAvailable" class="header-export">
+      <div @click="emitExportEvent" v-if="exportAvailable" class="header-export">
         <span>EXPORT <Icon size="12" type="md-download" /></span>
       </div>
       <div v-if="$store.state.user" class="header-user">
@@ -23,6 +23,8 @@
 </template>
 
 <script>
+import { EventBus } from '@/helpers/eventBus';
+
 import notifications from "@/mixins/notifications";
 
 import Logo from "@/components/Logo.vue";
@@ -36,9 +38,7 @@ export default {
   mixins: [notifications],
   computed: {
     exportAvailable() {
-      // TODO
-      return false;
-      // return this.$route.name !== "Utils";
+      return this.$route.name !== "Utils";
     },
   },
   methods: {
@@ -64,6 +64,9 @@ export default {
       this.notificationSuccess("You have been logged out successfully.");
       this.$router.push("/");
     },
+    emitExportEvent() {
+      EventBus.$emit(`export-${this.$route.name.toLowerCase()}`);
+    }
   },
 };
 </script>

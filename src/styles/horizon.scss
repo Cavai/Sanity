@@ -81,6 +81,14 @@
 
       transition: box-shadow 0.16s ease-in-out;
     }
+
+    .sub-menu-sparkline-container {
+      width: 175px;
+      margin-left: auto;
+      margin-right: 30px;
+      position: relative;
+      top: 10px;
+    }
   }
 
   #horizon-table {

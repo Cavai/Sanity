@@ -20,7 +20,7 @@ import moment from "moment";
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: "Sparkline",
-  props: ["commits"],
+  props: ["commits", "initialDates"],
   mounted() {
     if (this.commits.length) {
       let dates = this.commits.map((date) => date.split("T")[0]);
@@ -44,8 +44,8 @@ export default {
   },
   methods: {
     generateSparkData(dates) {
-      let firstCommit = moment.min(dates.map((d) => moment(d)));
-      let lastCommit = moment.max(dates.map((d) => moment(d))).add(1, "days");
+      let firstCommit = (this.initialDates && this.initialDates[0]) || moment.min(dates.map((d) => moment(d)));
+      let lastCommit = (this.initialDates && moment(this.initialDates[1]).add(1, "days")) || moment.max(dates.map((d) => moment(d))).add(1, "days");
 
       let datesRange = [];
 

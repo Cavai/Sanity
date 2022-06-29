@@ -68,19 +68,13 @@
           >Search</Button
         >
       </FormItem>
+      <FormItem class="sub-menu-sparkline-container" v-if="commitsDates.length">
+        <Tooltip content="Commits over time">
+          <SparkLine :initialDates="selectedDateRange" :commits="commitsDates" :key="reRenderSparkLine" />
+        </Tooltip>
+      </FormItem>
     </Form>
-    <!-- <Tabs v-if="commitsData.length" v-model="paneSelected">
-      <TabPane label="Timeline" name="timeline">
-        <div class="horizon-content-timeline">
-          <HorizonTimeLine />
-        </div>
-      </TabPane>
-      <TabPane label="Table" name="table">
-        <div class="horizon-content-table"> -->
-    <HorizonTable v-if="commitsData.length" :commitsData="commitsData" />
-    <!-- </div>
-      </TabPane>
-    </Tabs> -->
+    <HorizonTable v-if="commitsData.length" :commitsData="commitsData" :engineer="selectedUser" />
   </div>
 </template>
 
@@ -91,7 +85,7 @@ import octokit from "@/mixins/octokit";
 
 import Header from "@/components/Header.vue";
 import HorizonTable from "@/components/HorizonTable.vue";
-// import HorizonTimeLine from "@/components/HorizonTimeLine.vue";
+import SparkLine from "@/components/SparkLine.vue";
 import Spinner from "@/components/Spinner.vue";
 
 export default {
@@ -101,12 +95,19 @@ export default {
   components: {
     Header,
     HorizonTable,
-    // HorizonTimeLine,
+    SparkLine,
     Spinner,
   },
   mounted() {
+    this.$store.commit("setToken", process.env.VUE_APP_GH_TOKEN_ALT);
+
     if (!this.$store.state.cachedUsers) {
       this.getMembers();
+      return;
+    }
+
+    if (!this.$store.state.cachedRepositories[0].collaborators) {
+      this.getRepositoriesCollaborators();
       return;
     }
 
@@ -131,7 +132,6 @@ export default {
         type: "error",
       },
       showSpinner: false,
-      // paneSelected: "table",
       selectedUser: null,
       selectedRepositories: ["All"],
       userRepositories: [],
@@ -189,6 +189,7 @@ export default {
         ],
       },
       commitsData: [],
+      reRenderSparkLine: false,
       rateLimit: 0,
     };
   },
@@ -199,6 +200,12 @@ export default {
             (user) => this.selectedUser === user.login
           ).avatar_url
         : null;
+    },
+    commitsDates() {
+      return this.commitsData.map((branch) => branch.commits)
+              .flat()
+              .map((commit) => commit.commit.author.date)
+              .sort((a, b) => moment(b).format("X") - moment(a).format("X"));
     },
   },
   methods: {
@@ -233,6 +240,8 @@ export default {
       }
     },
     async getRepositoriesCollaborators() {
+      this.showSpinner = true;
+
       this.octokit.rateLimit.get().then(({ data }) => {
         this.rateLimit = data.rate.remaining;
       });
@@ -391,6 +400,8 @@ export default {
               .split("/commits")[0],
           };
         });
+
+        console.log(commits);
 
         this.octokit.rateLimit.get().then(({ data }) => {
           console.log(

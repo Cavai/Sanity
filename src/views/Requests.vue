@@ -39,6 +39,9 @@ export default {
     Spinner,
   },
   mixins: [octokit],
+  mounted() {
+    this.$store.commit("setToken", process.env.VUE_APP_GH_TOKEN);
+  },
   data() {
     return {
       additionalData: [],

@@ -1,6 +1,7 @@
 <template>
   <div id="horizon-table">
     <Table
+      ref="horizon-table"
       :columns="columns"
       :data="tableData"
       :disabled-hover="true"
@@ -62,12 +63,46 @@
 <script>
 import moment from "moment";
 
+import { EventBus } from '@/helpers/eventBus';
+
+import notifications from "@/mixins/notifications";
 import octokit from "@/mixins/octokit";
 
 export default {
   name: "HorizonTable",
-  mixins: [octokit],
-  props: ["commitsData"],
+  mixins: [notifications, octokit],
+  props: ["commitsData", "engineer"],
+  created() {
+    console.log(this.$parent);
+
+    EventBus.$on('export-horizon', () => {
+      try {
+        this.$refs['horizon-table'].exportCsv({
+          filename: `${process.env.VUE_APP_ORGANISATION}-HORIZON-${this.engineer}-${moment().format('DD-MM-YY')}`,
+          separator: ';',
+          columns: ['date', 'commit', 'branch', 'repository', 'details'],
+          data: [
+            {
+              date: 'DATE',
+              commit: 'COMMIT',
+              branch: 'BRANCH',
+              repository: 'REPOSITORY',
+              details: 'DETAILS',
+            },
+            ...this.tableData.map((entry) => ({
+              date: entry.date,
+              commit: entry.commit,
+              branch: entry.branch,
+              repository: entry.repository,
+              details: `+${entry.stats.additions} -${entry.stats.deletions} in ${entry.files} files`,
+            }))
+          ]
+        });
+      } catch(error) {
+        this.notificationError("An error occured during exporting table. Please try again.");
+      }
+    });
+  },
   async mounted() {
     const commits = this.commitsData
       .map((repo) =>
@@ -219,7 +254,7 @@ export default {
             const days = dates[0].date.diff(
               dates[dates.length - 1].date,
               "days"
-            );
+            ) + 1;
 
             summary[key] = {
               key,

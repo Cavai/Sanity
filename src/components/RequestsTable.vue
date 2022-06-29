@@ -1,6 +1,7 @@
 <template>
   <div id="requests-table">
     <Table
+      ref="requests-table"
       :key="reRender"
       row-key="id"
       :columns="requestsHeaders"
@@ -125,13 +126,16 @@ import isDarkColor from "is-dark-color";
 import moment from "moment";
 import { v4 as uuidv4 } from "uuid";
 
+import { EventBus } from '@/helpers/eventBus';
+
+import notifications from "@/mixins/notifications";
 import octokit from "@/mixins/octokit";
 
 import SparkLine from "@/components/SparkLine.vue";
 
 export default {
   name: "RequestsTable",
-  mixins: [octokit],
+  mixins: [notifications, octokit],
   props: {
     rawData: {
       type: Array,
@@ -144,6 +148,34 @@ export default {
     SparkLine,
   },
   created() {
+    EventBus.$on('export-requests', () => {
+      try {
+        this.$refs['requests-table'].exportCsv({
+          filename: `${process.env.VUE_APP_ORGANISATION}-REQUESTS-${moment().format('DD-MM-YY')}`,
+          separator: ';',
+          columns: ['name', 'last_commit', 'progress', 'stage', 'engineers'],
+          data: [
+            {
+              name: 'NAME',
+              last_commit: 'LAST_COMMIT',
+              progress: 'PROGRESS',
+              stage: 'STAGE',
+              engineers: 'ENGINEER(S)',
+            },
+            ...this.tableData.map((entry) => ({
+              name: entry.issue,
+              last_commit: entry.last_commit  !== "-" ? entry.last_commit : 'N/A',
+              progress: `${entry.tasks_done}/${entry.tasks_not_done} (${this.calculatePercent(entry.tasks_done, entry.tasks_not_done).toFixed(2)} %)`,
+              stage: entry.stage.name,
+              engineers: entry.engineers.map(engineer => engineer.login).join(", ") || "N/A",
+            }))
+          ]
+        });
+      } catch(error) {
+        this.notificationError("An error occured during exporting table. Please try again.");
+      }
+    });
+
     this.tableData = [
       ...this.rawData.map((request) => {
         let tasksDone = 0,
