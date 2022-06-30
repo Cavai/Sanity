@@ -7,7 +7,7 @@
       <router-link to="/requests">Requests</router-link>
       <router-link to="/stream">Stream</router-link>
       <router-link to="/horizon">Horizon</router-link>
-      <!-- <router-link to="/utils">Utils</router-link> -->
+      <router-link to="/utils">Utils</router-link>
     </nav>
     <div class="header-right">
       <div
@@ -42,7 +42,7 @@ export default {
   mixins: [notifications],
   computed: {
     exportAvailable() {
-      return this.$route.name !== "Utils";
+      return !["Utils", "Access", "Labels"].includes(this.$route.name);
     },
   },
   methods: {

@@ -254,7 +254,7 @@ export default {
               .sort((a, b) => b.timestamp - a.timestamp);
 
             const days =
-              dates[0].date.diff(dates[dates.length - 1].date, "days") + 1;
+              Math.ceil(dates[0].date.diff(dates[dates.length - 1].date, "days", true) + 1);
 
             summary[key] = {
               key,
