@@ -15,9 +15,12 @@ import "@/styles/main.scss";
 
 import VueJWT from "vuejs-jwt";
 
+import vClickOutside from 'v-click-outside';
+
 Vue.use(ViewUI, { locale });
 Vue.use(Trend);
 Vue.use(VueJWT);
+Vue.use(vClickOutside);
 
 Vue.config.productionTip = false;
 

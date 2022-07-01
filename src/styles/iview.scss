@@ -141,3 +141,23 @@ i.ivu-icon-ios-funnel.on {
   position: relative;
   top: -1px;
 }
+
+.ivu-table-cell {
+  white-space: nowrap;
+}
+
+.ivu-radio-wrapper span {
+  color: #515a6e;
+}
+
+.ivu-radio-checked .ivu-radio-inner {
+  border-color: #0b8eba;
+}
+
+.ivu-radio-inner:after {
+  background-color: #0b8eba;
+}
+
+.ivu-radio-focus {
+  box-shadow: none;
+}

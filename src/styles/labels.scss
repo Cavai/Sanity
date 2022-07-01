@@ -15,4 +15,170 @@
       line-height: 29px;
     }
   }
+
+  .sub-menu {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+
+    margin: 25px 30px;
+
+    padding-top: 25px;
+    padding-left: 25px;
+
+    background: #ffffff;
+
+    border-radius: 2.5px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 7%);
+
+    .sub-menu-repository {
+      min-width: 250px;
+    }
+
+    .sub-menu-copy {
+      position: relative;
+
+      z-index: 1;
+      max-width: 200px;
+
+      background: #0588bf;
+      color: #ffffff;
+
+      font-style: normal;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 15px;
+
+      padding-left: 15px;
+      padding-right: 15px;
+
+      background-image: linear-gradient(180deg, #0c9fcc 50.52%, #0b8eba);
+      border: none;
+      border-radius: 4px;
+
+      transition: box-shadow 0.16s ease-in-out;
+    }
+  }
+
+  .labels-content {
+
+    .labels-content-back {
+      cursor: pointer;
+
+      color: #5e5e5e;
+
+      margin-left: 30px;
+
+      width: 200px;
+    }
+
+    #repositories-table, #labels-table {
+
+      .sub-menu {
+        margin: 25px 0;
+
+        .picker {
+          position: absolute;
+          z-index: 9999;
+
+          padding-top: 10px;
+        }
+
+        .label-name-form-item {
+          display: flex;
+
+          span {
+            cursor: pointer;
+            margin-left: 5px;
+            font-size: 22px;
+          }
+        }
+      }
+
+      margin: 15px 30px;
+
+      .ivu-table-body {
+        border-bottom: 2px solid #dfdfdf;
+      }
+
+      table {
+        border-radius: 55px;
+      }
+
+      tr {
+        th {
+          height: 50px;
+
+          color: #afafaf;
+
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.03em;
+          text-transform: uppercase;
+
+          background: #ffffff;
+          border-bottom: 2px solid #dfdfdf;
+        }
+
+        td {
+          height: 40px;
+
+          color: #202020;
+
+          font-size: 13px;
+          font-weight: 400;
+          line-height: 18px;
+
+          white-space: no-wrap;
+
+          a {
+            color: #202020;
+          }
+
+          .label {
+            display: inline-block;
+
+            margin: 2.5px 0;
+            padding: 0 7px;
+
+            border-width: 1px;
+            border-style: solid;
+            border-radius: 24px;
+
+            font-size: 12px;
+            font-weight: 600;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
+              Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            line-height: 22px;
+            text-align: center;
+          }
+        }
+
+        .repository-labels-button, .labels-action-button {
+          background: #0588bf;
+          color: #ffffff;
+
+          font-style: normal;
+          font-size: 13px;
+          font-weight: 600;
+          line-height: 15px;
+
+          padding-left: 15px;
+          padding-right: 15px;
+
+          background-image: linear-gradient(180deg, #0c9fcc 50.52%, #0b8eba);
+
+          border: none;
+          border-radius: 4px;
+
+          transition: box-shadow 0.16s ease-in-out;
+
+          &:first-of-type {
+            margin-right: 5px;
+          }
+        }
+      }
+    }
+  }
 }
