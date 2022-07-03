@@ -45,7 +45,7 @@ export default {
         type: "error",
       },
       showSpinner: false,
-    }
+    };
   },
   mounted() {
     if (!this.$store.state.cachedRepositories[0].collaborators) {
@@ -124,6 +124,6 @@ export default {
       this.showSpinner = false;
       this.error.show = true;
     },
-  }
-}
+  },
+};
 </script>

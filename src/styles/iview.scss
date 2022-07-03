@@ -92,15 +92,20 @@ i.ivu-icon-ios-funnel.on {
   border: none !important;
 }
 
+.ivu-color-picker-hue:focus,
 .ivu-select-selection-focused,
 .ivu-select-selection:hover,
 .ivu-select-visible .ivu-select-selection,
 .ivu-input:hover,
 .ivu-date-picker-focused input:not([disabled]),
-.ivu-input:focus {
+.ivu-input:focus,
+.ivu-color-picker-focused,
+.ivu-color-picker > div:first-child:hover .ivu-input {
   border-color: #202020;
 }
 
+.ivu-color-picker-hue:focus,
+.ivu-color-picker-focused,
 .ivu-select-visible .ivu-select-selection,
 .ivu-date-picker-focused input:not([disabled]),
 .ivu-input:focus {
@@ -160,4 +165,29 @@ i.ivu-icon-ios-funnel.on {
 
 .ivu-radio-focus {
   box-shadow: none;
+}
+
+.ivu-color-picker-confirm {
+  button {
+    font-style: normal;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 15px;
+
+    border-radius: 4px;
+
+    transition: box-shadow 0.16s ease-in-out;
+
+    &:first-of-type:hover {
+      color: #515a6e;
+      border-color: #e3e5e8 !important;
+    }
+
+    &:last-of-type {
+      background-image: linear-gradient(180deg, #0c9fcc 50.52%, #0b8eba);
+      background: #0588bf;
+
+      color: #ffffff;
+    }
+  }
 }

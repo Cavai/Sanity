@@ -13,24 +13,50 @@
     <Form label-position="top" inline class="sub-menu">
       <FormItem label="Name">
         <div class="label-name-form-item">
-          <Input placeholder="Enter text..." />
-          <span id="picker-button">😀</span>
+          <Input
+            maxlength="50"
+            v-model="labelName"
+            placeholder="Enter text..."
+            class="label-name-input"
+          />
+          <span class="picker-button">😀</span>
         </div>
         <div class="picker">
-          <VEmojiPicker v-click-outside="pickerHandler" v-show="showEmojiPicker" @select="selectEmoji" />
+          <VEmojiPicker
+            v-click-outside="pickerHandler"
+            v-show="showEmojiPicker"
+            @select="selectEmoji"
+          />
         </div>
       </FormItem>
       <FormItem label="Description">
-        <Input placeholder="Enter text..." />
+        <Input
+          v-model="labelDescription"
+          placeholder="Enter text..."
+          class="label-description-input"
+        />
       </FormItem>
       <FormItem label="Color">
-        <ColorPicker />
+        <Icon
+          @click="generateRandomColor"
+          class="color-picker-repeat"
+          type="ios-repeat"
+          :size="20"
+        />
+        <ColorPicker v-model="labelColor" />
       </FormItem>
       <FormItem style="margin-top: 23px">
-        <Button
-          class="sub-menu-copy"
-          >Add</Button
-        >
+        <Button @click="saveLabel" class="sub-menu-copy">
+          {{ editMode ? "Edit" : "Add" }}
+        </Button>
+      </FormItem>
+      <FormItem v-if="editMode" style="margin-top: 23px">
+        <Button @click="exitEditMode" class="sub-menu-copy">Cancel</Button>
+      </FormItem>
+      <FormItem class="label-preview" label="Preview">
+        <div class="label" :style="generateLabelStyles(labelColor)">
+          {{ getLabelName(labelName) || "Label Preview" }}
+        </div>
       </FormItem>
     </Form>
     <Table
@@ -41,23 +67,16 @@
       :update-show-children="true"
     >
       <template slot-scope="{ row }" slot="label">
-        <div
-          class="label"
-          :style="generateLabelStyles(row.color)"
-        >
+        <div class="label" :style="generateLabelStyles(row.color)">
           {{ getLabelName(row.label) }}
         </div>
       </template>
       <!-- eslint-disable-next-line vue/no-unused-vars -->
       <template slot-scope="{ row }" slot="actions">
-        <Button
-          class="labels-action-button"
+        <Button class="labels-action-button" @click="editLabel(row)"
           >Edit</Button
         >
-        <Button
-          class="labels-action-button"
-          >Remove</Button
-        >
+        <Button class="labels-action-button">Remove</Button>
       </template>
     </Table>
   </div>
@@ -70,7 +89,7 @@ import octokit from "@/mixins/octokit";
 
 import isDarkColor from "is-dark-color";
 
-import { VEmojiPicker } from 'v-emoji-picker';
+import { VEmojiPicker } from "v-emoji-picker";
 
 const emojiDict = require("emoji-dictionary");
 
@@ -80,10 +99,12 @@ export default {
   mixins: [octokit],
   components: {
     Spinner,
-    VEmojiPicker
+    VEmojiPicker,
   },
   mounted() {
-    const repositoryLabels = this.$store.state.cachedRepositories.find((repository) => repository.name === this.repository)?.labels;
+    const repositoryLabels = this.$store.state.cachedRepositories.find(
+      (repository) => repository.name === this.repository
+    )?.labels;
 
     if (!repositoryLabels) {
       this.showSpinner = true;
@@ -96,7 +117,9 @@ export default {
         })
         .then((response) => {
           const repositories = this.$store.state.cachedRepositories;
-          const repository = repositories.find((repository) => repository.name === this.repository);
+          const repository = repositories.find(
+            (repository) => repository.name === this.repository
+          );
 
           repository.labels = response.data;
 
@@ -107,13 +130,13 @@ export default {
             )
           );
 
-          this.tableData = response.data.map((label => {
+          this.tableData = response.data.map((label) => {
             return {
               label: label.name,
               color: label.color,
               description: label.description,
-            }
-          }));
+            };
+          });
 
           this.showSpinner = false;
         })
@@ -127,16 +150,20 @@ export default {
           return;
         });
     } else {
-      const labels = this.$store.state.cachedRepositories.find((repository) => repository.name === this.repository).labels;
+      const labels = this.$store.state.cachedRepositories.find(
+        (repository) => repository.name === this.repository
+      ).labels;
 
-      this.tableData = labels.map((label => {
+      this.tableData = labels.map((label) => {
         return {
           label: label.name,
           color: label.color,
           description: label.description,
-        }
-      }));
+        };
+      });
     }
+
+    this.generateRandomColor();
   },
   data() {
     return {
@@ -148,6 +175,10 @@ export default {
       },
       showSpinner: false,
       showEmojiPicker: false,
+      labelName: "",
+      labelDescription: "",
+      labelColor: "",
+      editMode: false,
       columns: [
         {
           title: "Label",
@@ -157,9 +188,9 @@ export default {
           sortMethod(a, b, type) {
             if (type === "asc") {
               return a.toLowerCase().localeCompare(b.toLowerCase());
-            } else {
-              return b.toLowerCase().localeCompare(a.toLowerCase());
             }
+
+            return b.toLowerCase().localeCompare(a.toLowerCase());
           },
           width: 300,
         },
@@ -171,24 +202,56 @@ export default {
           title: "Actions",
           slot: "actions",
           width: 250,
-        }
+        },
       ],
       tableData: [],
-    }
+    };
   },
   methods: {
+    editLabel(label) {
+      this.labelName = label.label;
+      this.labelDescription = label.description;
+      this.labelColor = `#${label.color}`;
+
+      this.editMode = true;
+    },
+    exitEditMode() {
+      this.labelName = "";
+      this.labelDescription = "";
+
+      this.generateRandomColor();
+
+      this.editMode = false;
+    },
+    saveLabel() {
+      // TODO:
+      return;
+    },
     pickerHandler(event) {
-      if (event.target.id === 'picker-button') {
+      if (event.target.className === "picker-button") {
         this.showEmojiPicker = true;
-      } else {
-        this.showEmojiPicker = false;
+        return;
       }
+
+      this.showEmojiPicker = false;
     },
     selectEmoji(emoji) {
-      console.log(emoji)
+      this.labelName += emoji.data;
+    },
+    generateRandomColor() {
+      this.labelColor =
+        "#" +
+        (
+          "00000" + Math.floor(Math.random() * Math.pow(16, 6)).toString(16)
+        ).slice(-6);
     },
     generateLabelStyles(color) {
-      const value = `#${color}`;
+      if (!color) {
+        return "black";
+      }
+
+      const value = color.includes("#") ? color : `#${color}`;
+
       return {
         backgroundColor: value,
         borderColor: value === "#ffffff" ? "gray" : "transparent",
@@ -222,6 +285,6 @@ export default {
       this.showSpinner = false;
       this.error.show = true;
     },
-  }
-}
+  },
+};
 </script>

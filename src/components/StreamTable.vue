@@ -175,9 +175,9 @@ export default {
           sortMethod(a, b, type) {
             if (type === "asc") {
               return moment(a).unix() - moment(b).unix();
-            } else {
-              return moment(b).unix() - moment(a).unix();
             }
+
+            return moment(b).unix() - moment(a).unix();
           },
           width: 160,
         },

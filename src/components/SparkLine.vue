@@ -37,9 +37,9 @@ export default {
     generateValues() {
       if (this.commits.length) {
         return [0, ...this.sparkData];
-      } else {
-        return [0, 0, 0, 0, 0, 0, 0];
       }
+
+      return [0, 0, 0, 0, 0, 0, 0];
     },
   },
   methods: {

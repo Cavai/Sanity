@@ -38,9 +38,9 @@ export default {
           sortMethod(a, b, type) {
             if (type === "asc") {
               return a.toLowerCase().localeCompare(b.toLowerCase());
-            } else {
-              return b.toLowerCase().localeCompare(a.toLowerCase());
             }
+
+            return b.toLowerCase().localeCompare(a.toLowerCase());
           },
           width: 300,
         },
@@ -59,9 +59,9 @@ export default {
           repository: repository.name,
           repository_url: repository.html_url,
           description: repository.description,
-        }
-      })
-    }
-  }
-}
+        };
+      }),
+    };
+  },
+};
 </script>

@@ -11,11 +11,11 @@ import "view-design/dist/styles/iview.css";
 
 import Trend from "vuetrend";
 
-import "@/styles/main.scss";
-
 import VueJWT from "vuejs-jwt";
 
-import vClickOutside from 'v-click-outside';
+import vClickOutside from "v-click-outside";
+
+import "@/styles/main.scss";
 
 Vue.use(ViewUI, { locale });
 Vue.use(Trend);

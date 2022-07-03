@@ -178,9 +178,9 @@ export default {
           sortMethod(a, b, type) {
             if (type === "asc") {
               return moment(a).unix() - moment(b).unix();
-            } else {
-              return moment(b).unix() - moment(a).unix();
             }
+
+            return moment(b).unix() - moment(a).unix();
           },
         },
         {
@@ -253,8 +253,9 @@ export default {
               })
               .sort((a, b) => b.timestamp - a.timestamp);
 
-            const days =
-              Math.ceil(dates[0].date.diff(dates[dates.length - 1].date, "days", true) + 1);
+            const days = Math.ceil(
+              dates[0].date.diff(dates[dates.length - 1].date, "days", true) + 1
+            );
 
             summary[key] = {
               key,
