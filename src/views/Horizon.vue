@@ -125,10 +125,6 @@ export default {
       );
 
       this.selectedUser = engineer ? engineer.login : null;
-
-      // this.$nextTick(() => {
-      //   this.getHorizonData();
-      // });
     }
   },
   data() {
@@ -299,10 +295,6 @@ export default {
                   .includes(this.$store.state.user.login);
               }
             );
-
-            // this.$nextTick(() => {
-            //   this.getHorizonData();
-            // });
           }
 
           this.octokit.rateLimit.get().then(({ data }) => {
@@ -446,14 +438,13 @@ export default {
   },
   watch: {
     selectedRepositories(newVal, oldVal) {
-      // Delete "All"
       if (newVal.length > 1 && oldVal.includes("All")) {
         this.selectedRepositories.splice(
           this.selectedRepositories.indexOf("All"),
           1
         );
       }
-      // Add "All", delete others
+
       if (newVal.length > 1 && newVal.includes("All")) {
         this.selectedRepositories = ["All"];
       }

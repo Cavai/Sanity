@@ -31,6 +31,7 @@
       </FormItem>
       <FormItem label="Description">
         <Input
+          maxlength="100"
           v-model="labelDescription"
           placeholder="Enter text..."
           class="label-description-input"
@@ -76,7 +77,7 @@
         <Button class="labels-action-button" @click="editLabel(row)"
           >Edit</Button
         >
-        <Button class="labels-action-button">Remove</Button>
+        <Button @click="removeLabel(row)" class="labels-action-button">Remove</Button>
       </template>
     </Table>
   </div>
@@ -85,6 +86,7 @@
 <script>
 import Spinner from "@/components/Spinner.vue";
 
+import notifications from "@/mixins/notifications";
 import octokit from "@/mixins/octokit";
 
 import isDarkColor from "is-dark-color";
@@ -96,7 +98,7 @@ const emojiDict = require("emoji-dictionary");
 export default {
   name: "RepositoriesTable",
   props: ["repository"],
-  mixins: [octokit],
+  mixins: [notifications, octokit],
   components: {
     Spinner,
     VEmojiPicker,
@@ -176,6 +178,7 @@ export default {
       showSpinner: false,
       showEmojiPicker: false,
       labelName: "",
+      editLabelName: "",
       labelDescription: "",
       labelColor: "",
       editMode: false,
@@ -213,10 +216,13 @@ export default {
       this.labelDescription = label.description;
       this.labelColor = `#${label.color}`;
 
+      this.editLabelName = label.label;
+
       this.editMode = true;
     },
     exitEditMode() {
       this.labelName = "";
+      this.editLabelName = "";
       this.labelDescription = "";
 
       this.generateRandomColor();
@@ -224,8 +230,154 @@ export default {
       this.editMode = false;
     },
     saveLabel() {
-      // TODO:
-      return;
+      if (this.labelName === "") {
+        this.notificationError("Label name is required.");
+        return;
+      }
+
+      this.showSpinner = true;
+
+      if (!this.editMode) {
+        this.octokit.issues.createLabel({
+          owner: process.env.VUE_APP_ORGANISATION,
+          repo: this.repository,
+          name: this.labelName,
+          color: this.labelColor.replace("#", "").toLowerCase(),
+          description: this.labelDescription,
+        })
+        .then(({ data }) => {
+          this.notificationSuccess("Label added successfully");
+
+          const repositories = this.$store.state.cachedRepositories;
+          const repository = repositories.find(
+            (repo) => repo.name === this.repository
+          );
+
+          repository.labels = [...repository.labels, data];
+
+          this.$store.commit(
+            "setCachedRepositories",
+            repositories.sort((a, b) =>
+              a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+            )
+          );
+
+          this.tableData = repository.labels.map((label) => {
+            return {
+              label: label.name,
+              color: label.color,
+              description: label.description,
+            };
+          });
+
+          this.showSpinner = false;
+
+          this.exitEditMode();
+
+        })
+        .catch((error) => {
+          if (error.response.status === 422) {
+            this.notificationError("Label already exists.");
+            return;
+          }
+
+          this.notificationError("An error occured during adding label. Please try again.");
+
+          this.showSpinner = false;
+        });
+      } else {
+        this.octokit.issues
+          .updateLabel({
+            owner: process.env.VUE_APP_ORGANISATION,
+            repo: this.repository,
+            name: this.editLabelName,
+            new_name: this.labelName,
+            color: this.labelColor.replace("#", "").toLowerCase(),
+            description: this.labelDescription,
+          })
+          .then(({ data }) => {
+            this.notificationSuccess("Label updated successfully");
+
+            const repositories = this.$store.state.cachedRepositories;
+            const repository = repositories.find(
+              (repo) => repo.name === this.repository
+            );
+
+            repository.labels = [...repository.labels.map((label) => {
+              if (label.name === this.editLabelName) {
+                label = {...data};
+              }
+
+              return label;
+            })];
+
+            this.$store.commit(
+              "setCachedRepositories",
+              repositories.sort((a, b) =>
+                a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+              )
+            );
+
+            this.tableData = repository.labels.map((label) => {
+              return {
+                label: label.name,
+                color: label.color,
+                description: label.description,
+              };
+            });
+
+            this.showSpinner = false;
+
+            this.exitEditMode();
+          })
+          .catch(() => {
+            this.notificationError("An error occured during editing label. Please try again.");
+
+            this.showSpinner = false;
+          });
+      }
+    },
+    removeLabel(data) {
+      this.showSpinner = true;
+
+      this.octokit.issues
+        .deleteLabel({
+          owner: process.env.VUE_APP_ORGANISATION,
+          repo: this.repository,
+          name: data.label,
+        })
+        .then(() => {
+          this.notificationSuccess("Label removed successfully");
+
+          const repositories = this.$store.state.cachedRepositories;
+          const repository = repositories.find(
+            (repo) => repo.name === this.repository
+          );
+
+          repository.labels = [...repository.labels.filter(label => {
+            return label.name !== data.label;
+          })];
+
+          this.$store.commit(
+            "setCachedRepositories",
+            repositories.sort((a, b) =>
+              a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+            )
+          );
+
+          this.tableData = repository.labels.map((label) => {
+            return {
+              label: label.name,
+              color: label.color,
+              description: label.description,
+            };
+          });
+
+          this.showSpinner = false;
+        })
+        .catch(() => {
+          this.notificationError("An error occured during adding label. Please try again.");
+        });
     },
     pickerHandler(event) {
       if (event.target.className === "picker-button") {

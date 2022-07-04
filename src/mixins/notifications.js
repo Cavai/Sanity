@@ -12,6 +12,18 @@ const notifications = {
         desc,
       });
     },
+    notificationWarning(desc) {
+      this.$Notice.warning({
+        title: "Warning",
+        desc,
+      });
+    },
+    notificationInfo(desc) {
+      this.$Notice.info({
+        title: "Info",
+        desc,
+      });
+    },
   },
 };
 
