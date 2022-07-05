@@ -77,7 +77,9 @@
         <Button class="labels-action-button" @click="editLabel(row)"
           >Edit</Button
         >
-        <Button @click="removeLabel(row)" class="labels-action-button">Remove</Button>
+        <Button @click="removeLabel(row)" class="labels-action-button"
+          >Remove</Button
+        >
       </template>
     </Table>
   </div>
@@ -155,6 +157,8 @@ export default {
       const labels = this.$store.state.cachedRepositories.find(
         (repository) => repository.name === this.repository
       ).labels;
+
+      console.log(labels);
 
       this.tableData = labels.map((label) => {
         return {
@@ -238,53 +242,55 @@ export default {
       this.showSpinner = true;
 
       if (!this.editMode) {
-        this.octokit.issues.createLabel({
-          owner: process.env.VUE_APP_ORGANISATION,
-          repo: this.repository,
-          name: this.labelName,
-          color: this.labelColor.replace("#", "").toLowerCase(),
-          description: this.labelDescription,
-        })
-        .then(({ data }) => {
-          this.notificationSuccess("Label added successfully");
+        this.octokit.issues
+          .createLabel({
+            owner: process.env.VUE_APP_ORGANISATION,
+            repo: this.repository,
+            name: this.labelName,
+            color: this.labelColor.replace("#", "").toLowerCase(),
+            description: this.labelDescription,
+          })
+          .then(({ data }) => {
+            this.notificationSuccess("Label added successfully");
 
-          const repositories = this.$store.state.cachedRepositories;
-          const repository = repositories.find(
-            (repo) => repo.name === this.repository
-          );
+            const repositories = this.$store.state.cachedRepositories;
+            const repository = repositories.find(
+              (repo) => repo.name === this.repository
+            );
 
-          repository.labels = [...repository.labels, data];
+            repository.labels = [...repository.labels, data];
 
-          this.$store.commit(
-            "setCachedRepositories",
-            repositories.sort((a, b) =>
-              a.name.toLowerCase().localeCompare(b.name.toLowerCase())
-            )
-          );
+            this.$store.commit(
+              "setCachedRepositories",
+              repositories.sort((a, b) =>
+                a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+              )
+            );
 
-          this.tableData = repository.labels.map((label) => {
-            return {
-              label: label.name,
-              color: label.color,
-              description: label.description,
-            };
+            this.tableData = repository.labels.map((label) => {
+              return {
+                label: label.name,
+                color: label.color,
+                description: label.description,
+              };
+            });
+
+            this.showSpinner = false;
+
+            this.exitEditMode();
+          })
+          .catch((error) => {
+            if (error.response.status === 422) {
+              this.notificationError("Label already exists.");
+              return;
+            }
+
+            this.notificationError(
+              "An error occured during adding label. Please try again."
+            );
+
+            this.showSpinner = false;
           });
-
-          this.showSpinner = false;
-
-          this.exitEditMode();
-
-        })
-        .catch((error) => {
-          if (error.response.status === 422) {
-            this.notificationError("Label already exists.");
-            return;
-          }
-
-          this.notificationError("An error occured during adding label. Please try again.");
-
-          this.showSpinner = false;
-        });
       } else {
         this.octokit.issues
           .updateLabel({
@@ -303,13 +309,15 @@ export default {
               (repo) => repo.name === this.repository
             );
 
-            repository.labels = [...repository.labels.map((label) => {
-              if (label.name === this.editLabelName) {
-                label = {...data};
-              }
+            repository.labels = [
+              ...repository.labels.map((label) => {
+                if (label.name === this.editLabelName) {
+                  label = { ...data };
+                }
 
-              return label;
-            })];
+                return label;
+              }),
+            ];
 
             this.$store.commit(
               "setCachedRepositories",
@@ -331,7 +339,9 @@ export default {
             this.exitEditMode();
           })
           .catch(() => {
-            this.notificationError("An error occured during editing label. Please try again.");
+            this.notificationError(
+              "An error occured during editing label. Please try again."
+            );
 
             this.showSpinner = false;
           });
@@ -354,9 +364,11 @@ export default {
             (repo) => repo.name === this.repository
           );
 
-          repository.labels = [...repository.labels.filter(label => {
-            return label.name !== data.label;
-          })];
+          repository.labels = [
+            ...repository.labels.filter((label) => {
+              return label.name !== data.label;
+            }),
+          ];
 
           this.$store.commit(
             "setCachedRepositories",
@@ -376,7 +388,9 @@ export default {
           this.showSpinner = false;
         })
         .catch(() => {
-          this.notificationError("An error occured during adding label. Please try again.");
+          this.notificationError(
+            "An error occured during adding label. Please try again."
+          );
         });
     },
     pickerHandler(event) {
