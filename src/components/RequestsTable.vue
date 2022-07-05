@@ -199,8 +199,6 @@ export default {
           tasksNotDone = this.countInString("- [ ]", workPhases);
         }
 
-        console.log(request.commits);
-
         const commits =
           request.commits.length &&
           request.commits

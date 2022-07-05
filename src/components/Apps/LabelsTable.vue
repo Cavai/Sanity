@@ -158,8 +158,6 @@ export default {
         (repository) => repository.name === this.repository
       ).labels;
 
-      console.log(labels);
-
       this.tableData = labels.map((label) => {
         return {
           label: label.name,
