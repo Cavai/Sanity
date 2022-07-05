@@ -110,7 +110,7 @@ const routes = [
     path: "/utils/access",
     name: "Access",
     component: () =>
-      import(/* webpackChunkName: "start" */ "../views/Utils/Access.vue"),
+      import(/* webpackChunkName: "start" */ "../views/Apps/Access.vue"),
     props: true,
     beforeEnter: (to, from, next) => {
       if (!store.state.userAuthenticated || store.getters.isExpired) {
@@ -127,7 +127,7 @@ const routes = [
     path: "/utils/labels",
     name: "Labels",
     component: () =>
-      import(/* webpackChunkName: "start" */ "../views/Utils/Labels.vue"),
+      import(/* webpackChunkName: "start" */ "../views/Apps/Labels.vue"),
     props: true,
     beforeEnter: (to, from, next) => {
       if (!store.state.userAuthenticated || store.getters.isExpired) {

@@ -199,10 +199,13 @@ export default {
           tasksNotDone = this.countInString("- [ ]", workPhases);
         }
 
+        console.log(request.commits);
+
         const commits =
           request.commits.length &&
           request.commits
             .flat()
+            .filter((commit) => commit)
             .map((commit) => commit.commit.author.date)
             .sort((a, b) => moment(b).format("X") - moment(a).format("X"));
 

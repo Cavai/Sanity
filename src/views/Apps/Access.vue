@@ -1,15 +1,6 @@
 <template>
   <div id="access">
     <Spinner v-if="showSpinner" />
-    <Alert
-      v-if="error.show"
-      :type="error.type"
-      show-icon
-      class="error_container"
-    >
-      {{ error.title }}
-      <span slot="desc">{{ error.message }}</span>
-    </Alert>
     <Header />
     <div class="sub-header">
       <h2>Access</h2>
@@ -21,16 +12,18 @@
 </template>
 
 <script>
-import AccessTable from "@/components/AccessTable.vue";
+import notifications from "@/mixins/notifications";
+import octokit from "@/mixins/octokit";
+
+import AccessTable from "@/components/Apps/AccessTable.vue";
 import Header from "@/components/Header.vue";
 import Spinner from "@/components/Spinner.vue";
 
-import octokit from "@/mixins/octokit";
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: "Access",
-  mixins: [octokit],
+  mixins: [notifications, octokit],
   components: {
     AccessTable,
     Header,
@@ -38,12 +31,6 @@ export default {
   },
   data() {
     return {
-      error: {
-        show: false,
-        title: "Service temporarily unavailable",
-        message: "Please try again in a few minutes.",
-        type: "error",
-      },
       showSpinner: false,
     };
   },
@@ -107,22 +94,12 @@ export default {
           this.showSpinner = false;
         })
         .catch(() => {
-          this.showAlert(
-            `An error has occured with the data fetch`,
-            `Please try again in a few minutes.`,
-            "error"
+          this.notificationError(
+            "An error has occured with the data fetch. Please try again."
           );
 
-          return;
+          this.showSpinner = false;
         });
-    },
-    showAlert(title, message, type) {
-      this.error.title = title ?? this.error.title;
-      this.error.message = message ?? this.error.message;
-      this.error.type = type ?? this.error.type;
-
-      this.showSpinner = false;
-      this.error.show = true;
     },
   },
 };

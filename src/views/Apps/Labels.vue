@@ -70,7 +70,7 @@ import notifications from "@/mixins/notifications";
 import octokit from "@/mixins/octokit";
 
 import Header from "@/components/Header.vue";
-import LabelsTable from "@/components/LabelsTable.vue";
+import LabelsTable from "@/components/Apps/LabelsTable.vue";
 import RepositoriesTable from "@/components/RepositoriesTable.vue";
 import Spinner from "@/components/Spinner.vue";
 
