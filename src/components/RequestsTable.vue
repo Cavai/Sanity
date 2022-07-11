@@ -1,6 +1,7 @@
 <template>
   <div id="requests-table">
     <Table
+      ref="requests-table"
       :key="reRender"
       row-key="id"
       :columns="requestsHeaders"
@@ -87,13 +88,8 @@
       </template>
       <template slot-scope="{ row }" slot="stage">
         <div class="labels-container" v-if="row.stage !== null">
-          <div
-            class="label"
-            :style="
-              generateLabelStyles(row.stage, getStageLabelColor(row.stage))
-            "
-          >
-            {{ row.stage }}
+          <div class="label" :style="generateLabelStyles(row.stage.color)">
+            {{ row.stage.name }}
           </div>
         </div>
         <Tooltip content="Repository" v-if="row.stage === null">
@@ -130,13 +126,16 @@ import isDarkColor from "is-dark-color";
 import moment from "moment";
 import { v4 as uuidv4 } from "uuid";
 
+import { EventBus } from "@/helpers/eventBus";
+
+import notifications from "@/mixins/notifications";
 import octokit from "@/mixins/octokit";
 
 import SparkLine from "@/components/SparkLine.vue";
 
 export default {
   name: "RequestsTable",
-  mixins: [octokit],
+  mixins: [notifications, octokit],
   props: {
     rawData: {
       type: Array,
@@ -149,6 +148,46 @@ export default {
     SparkLine,
   },
   created() {
+    EventBus.$on("export-requests", () => {
+      try {
+        this.$refs["requests-table"].exportCsv({
+          filename: `${
+            process.env.VUE_APP_ORGANISATION
+          }-REQUESTS-${moment().format("DD-MM-YY")}`,
+          separator: ";",
+          columns: ["name", "last_commit", "progress", "stage", "engineers"],
+          data: [
+            {
+              name: "NAME",
+              last_commit: "LAST_COMMIT",
+              progress: "PROGRESS",
+              stage: "STAGE",
+              engineers: "ENGINEER(S)",
+            },
+            ...this.tableData.map((entry) => ({
+              name: entry.issue,
+              last_commit:
+                entry.last_commit !== "-" ? entry.last_commit : "N/A",
+              progress: `${entry.tasks_done}/${
+                entry.tasks_not_done
+              } (${this.calculatePercent(
+                entry.tasks_done,
+                entry.tasks_not_done
+              ).toFixed(2)} %)`,
+              stage: entry.stage.name,
+              engineers:
+                entry.engineers.map((engineer) => engineer.login).join(", ") ||
+                "N/A",
+            })),
+          ],
+        });
+      } catch (error) {
+        this.notificationError(
+          "An error occured during exporting table. Please try again."
+        );
+      }
+    });
+
     this.tableData = [
       ...this.rawData.map((request) => {
         let tasksDone = 0,
@@ -164,6 +203,7 @@ export default {
           request.commits.length &&
           request.commits
             .flat()
+            .filter((commit) => commit)
             .map((commit) => commit.commit.author.date)
             .sort((a, b) => moment(b).format("X") - moment(a).format("X"));
 
@@ -175,8 +215,12 @@ export default {
           last_commit: commits ? moment(commits[0]).format("DD MMM YYYY") : "-",
           tasks_done: tasksDone,
           tasks_not_done: tasksNotDone,
-          stage: request.labels.find((label) => label.name.includes("STAGE"))
-            .name,
+          stage: {
+            name: request.labels.find((label) => label.name.includes("STAGE"))
+              .name,
+            color: request.labels.find((label) => label.name.includes("STAGE"))
+              .color,
+          },
           engineers: request.assignees,
           children: request.pulls.length
             ? request.pulls.map((pull) => ({
@@ -263,6 +307,10 @@ export default {
               label: "STAGE-3",
               value: "STAGE-3",
             },
+            {
+              label: "STAGE-4",
+              value: "STAGE-4",
+            },
           ],
           filterMultiple: true,
           filterMethod(value, row) {
@@ -316,23 +364,13 @@ export default {
 
       return results;
     },
-    generateLabelStyles(name, color) {
+    generateLabelStyles(color) {
       const value = `#${color}`;
       return {
         backgroundColor: value,
         borderColor: value === "#ffffff" ? "gray" : "transparent",
         color: isDarkColor(value) || color === "ff0ea7" ? "white" : "black",
       };
-    },
-    getStageLabelColor(stage) {
-      switch (stage) {
-        case "STAGE-1":
-          return this.stageLabelColors[0];
-        case "STAGE-2":
-          return this.stageLabelColors[1];
-        case "STAGE-3":
-          return this.stageLabelColors[2];
-      }
     },
     async handleCommitData(item, callback) {
       const commitData = await this.octokit.repos.getCommit({
@@ -380,51 +418,30 @@ export default {
     },
     sortTable(options) {
       if (options.column.title === "Progress") {
-        if (options.order === "asc") {
-          this.tableData.sort((a, b) => {
-            let aPerc =
-              (a.tasks_done / (a.tasks_done + a.tasks_not_done)) * 100;
-            let bPerc =
-              (b.tasks_done / (b.tasks_done + b.tasks_not_done)) * 100;
+        this.tableData.sort((a, b) => {
+          let aPerc = (a.tasks_done / (a.tasks_done + a.tasks_not_done)) * 100;
+          let bPerc = (b.tasks_done / (b.tasks_done + b.tasks_not_done)) * 100;
 
-            aPerc = isNaN(aPerc) ? 0 : aPerc;
-            bPerc = isNaN(bPerc) ? 0 : bPerc;
+          aPerc = isNaN(aPerc) ? 0 : aPerc;
+          bPerc = isNaN(bPerc) ? 0 : bPerc;
 
-            return aPerc - bPerc;
-          });
-        } else if (options.order === "desc") {
-          this.tableData.sort((a, b) => {
-            let aPerc =
-              (a.tasks_done / (a.tasks_done + a.tasks_not_done)) * 100;
-            let bPerc =
-              (b.tasks_done / (b.tasks_done + b.tasks_not_done)) * 100;
-
-            aPerc = isNaN(aPerc) ? 0 : aPerc;
-            bPerc = isNaN(bPerc) ? 0 : bPerc;
-
-            return bPerc - aPerc;
-          });
-        } else {
-          this.tableData.sort((a, b) => {
-            return a.id - b.id;
-          });
-        }
+          return options.order === "asc"
+            ? aPerc - bPerc
+            : options.order === "desc"
+            ? bPerc - aPerc
+            : a.id - b.id;
+        });
       } else if (options.column.title === "Last Commit") {
-        if (options.order === "asc") {
-          this.tableData.sort((a, b) => {
-            const timeA = moment(a.last_commit).unix();
-            const timeB = moment(b.last_commit).unix();
+        this.tableData.sort((a, b) => {
+          const timeA = moment(a.last_commit).isValid()
+            ? moment(a.last_commit).unix()
+            : 0;
+          const timeB = moment(b.last_commit).isValid()
+            ? moment(b.last_commit).unix()
+            : 0;
 
-            return (timeA ? timeA : 0) - (timeB ? timeB : 0);
-          });
-        } else if (options.order === "desc") {
-          this.tableData.sort((a, b) => {
-            const timeA = moment(a.last_commit).unix();
-            const timeB = moment(b.last_commit).unix();
-
-            return (timeB ? timeB : 0) - (timeA ? timeA : 0);
-          });
-        }
+          return options.order === "asc" ? timeA - timeB : timeB - timeA;
+        });
       }
 
       this.reRenderSparkLine = !this.reRenderSparkLine;

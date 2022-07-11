@@ -1,51 +1,60 @@
-#header,
-.header-left,
-.header-right {
-  display: flex;
-  align-items: center;
-}
-
-.header-left,
-.header-right {
-  justify-content: space-around;
-}
-
 #header {
+  &,
+  .header-left,
+  .header-right {
+    display: flex;
+    align-items: center;
+  }
+
+  .header-left,
+  .header-right {
+    justify-content: space-around;
+  }
+
   position: absolute;
   top: 0;
 
   height: 40px;
   width: 100vw;
 
-  background: #333333;
-
   justify-content: space-between;
 
-  .header-left {
-    a {
-      // &.header_link_logo {
-      //   position: relative;
-      //   top: 2px;
-      // }
-    }
-  }
+  background: #333333;
 
   nav a,
   .header-export span,
   .header-user span {
-    padding: 10px 13px 10px 12px;
-    text-transform: uppercase;
+    padding: 10px 12px;
 
     color: #efefef;
+
     font-size: 11px;
     font-weight: 500;
+    text-transform: uppercase;
   }
 
-  .header-export,
-  .header-user {
-    margin-right: 25px;
-    span {
-      cursor: pointer;
+  nav {
+    a:first-of-type {
+      padding-left: 0;
+      margin-left: 15px;
+    }
+  }
+
+  .header-right {
+    .header-export,
+    .header-user {
+      span {
+        cursor: pointer;
+      }
+    }
+
+    .header-export {
+      margin-right: 15px;
+    }
+
+    .header-user {
+      padding-right: 0;
+      margin-right: 20px;
     }
   }
 }

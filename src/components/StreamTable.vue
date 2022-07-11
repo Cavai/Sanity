@@ -1,6 +1,11 @@
 <template>
   <div id="stream-table">
-    <Table :columns="columns" :data="rawData" :disabled-hover="true">
+    <Table
+      ref="stream-table"
+      :columns="columns"
+      :data="rawData"
+      :disabled-hover="true"
+    >
       <template slot-scope="{ row }" slot="title">
         <a :href="row.url" target="_blank">{{ row.title }}</a>
       </template>
@@ -13,7 +18,7 @@
             v-for="label in row.labels"
             :key="label.id"
             class="label"
-            :style="generateLabelStyles(label.name, label.color)"
+            :style="generateLabelStyles(label.color)"
           >
             {{ getLabelName(label.name) }}
           </div>
@@ -56,11 +61,64 @@
 import isDarkColor from "is-dark-color";
 import moment from "moment";
 
+import { EventBus } from "@/helpers/eventBus";
+
+import notifications from "@/mixins/notifications";
+
 const emojiDict = require("emoji-dictionary");
 
 export default {
   name: "StreamTable",
   props: ["rawData"],
+  mixins: [notifications],
+  created() {
+    EventBus.$on("export-stream", () => {
+      try {
+        this.$refs["stream-table"].exportCsv({
+          filename: `${
+            process.env.VUE_APP_ORGANISATION
+          }-STREAM-${moment().format("DD-MM-YY")}`,
+          separator: ";",
+          columns: [
+            "title",
+            "type",
+            "repository",
+            "last_activity",
+            "labels",
+            "author",
+            "assigness",
+          ],
+          data: [
+            {
+              title: "TITLE",
+              type: "TYPE",
+              repository: "REPOSITORY",
+              last_activity: "LAST ACTIVITY",
+              labels: "LABELS",
+              author: "AUTHOR",
+              assignees: "ASSIGNEES",
+            },
+            ...this.rawData.map((entry) => ({
+              title: entry.title,
+              type: entry.type,
+              repository: entry.repository,
+              last_activity: entry.last_activity,
+              labels:
+                entry.labels.map((label) => label.name).join(", ") || "N/A",
+              author: entry.author.login || "N/A",
+              assignees:
+                entry.assignees.map((assignee) => assignee.login).join(", ") ||
+                "N/A",
+            })),
+          ],
+        });
+      } catch (error) {
+        this.notificationError(
+          "An error occured during exporting table. Please try again."
+        );
+      }
+    });
+  },
   data() {
     return {
       columns: [
@@ -117,9 +175,9 @@ export default {
           sortMethod(a, b, type) {
             if (type === "asc") {
               return moment(a).unix() - moment(b).unix();
-            } else {
-              return moment(b).unix() - moment(a).unix();
             }
+
+            return moment(b).unix() - moment(a).unix();
           },
           width: 160,
         },
@@ -198,7 +256,7 @@ export default {
     },
   },
   methods: {
-    generateLabelStyles(name, color) {
+    generateLabelStyles(color) {
       const value = `#${color}`;
       return {
         backgroundColor: value,

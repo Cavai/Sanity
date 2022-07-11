@@ -11,72 +11,105 @@
 
     h2 {
       font-size: 21px;
-      line-height: 29px;
       font-weight: 400;
+      line-height: 29px;
     }
   }
 
   .sub-menu {
     display: flex;
+    flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    flex-direction: row;
 
     margin: 25px 30px;
 
-    background: #ffffff;
     padding-top: 25px;
     padding-left: 25px;
+
+    background: #ffffff;
 
     border-radius: 2.5px;
     box-shadow: 0 4px 12px rgb(0 0 0 / 7%);
 
     .ivu-form-item-label {
       color: #afafaf;
+      background: #ffffff;
+
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.03em;
       text-transform: uppercase;
-      background: #ffffff;
     }
 
     .sub-menu-engineer {
-      max-width: 200px;
+      max-width: 300px;
+      min-width: 250px;
     }
 
     .sub-menu-engineer,
     .sub-menu-date-picker {
-      max-width: 300px;
+      max-width: 350px;
+      min-width: 200px;
     }
 
     .sub-menu-repository {
       max-width: 450px;
+      min-width: 200px;
     }
 
     .sub-menu-search {
-      background: #0588bf;
-      color: #ffffff;
+      position: relative;
+
+      z-index: 1;
       max-width: 200px;
 
+      background: #0588bf;
+      color: #ffffff;
+
       font-style: normal;
-      font-weight: 300;
       font-size: 13px;
-      line-height: 18px;
       font-weight: 600;
       line-height: 15px;
+
       padding-left: 15px;
       padding-right: 15px;
+
       background-image: linear-gradient(180deg, #0c9fcc 50.52%, #0b8eba);
-      border-radius: 4px;
-      transition: box-shadow 0.16s ease-in-out;
       border: none;
-      z-index: 1;
+      border-radius: 4px;
+
+      transition: box-shadow 0.16s ease-in-out;
+    }
+
+    .sub-menu-sparkline-container {
+      width: 175px;
+      margin-left: auto;
+      margin-right: 30px;
       position: relative;
+      top: 10px;
     }
   }
 
   #horizon-table {
     margin: 15px 30px;
+
+    .ivu-table-body {
+      border-bottom: 2px solid #dfdfdf;
+    }
+
+    .ivu-table-summary {
+      border-top: unset !important;
+
+      tr td {
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 18px;
+
+        background: #ffffff;
+        color: #5e5e5e;
+      }
+    }
 
     table {
       border-radius: 55px;
@@ -87,6 +120,7 @@
         height: 50px;
 
         color: #afafaf;
+
         font-size: 11px;
         font-weight: 600;
         letter-spacing: 0.03em;
@@ -97,24 +131,27 @@
       }
 
       td {
+        height: 40px;
+
         color: #202020;
+
         font-size: 13px;
         font-weight: 400;
         line-height: 18px;
-
-        height: 40px;
 
         a {
           color: #202020;
         }
 
         .commit-stats {
-          list-style-type: none;
           display: flex;
           align-items: center;
 
+          list-style-type: none;
+
           li {
             margin: 0 5px;
+
             font-family: "Noto Sans Mono", monospace;
           }
 
@@ -122,11 +159,12 @@
             &:after {
               content: "";
               position: absolute;
+              transform: translate(5px, 5px);
+
               width: 1px;
               height: 10px;
-              background: #e8eaec;
 
-              transform: translate(5px, 5px);
+              background: #e8eaec;
             }
           }
         }

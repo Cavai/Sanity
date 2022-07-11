@@ -106,6 +106,40 @@ const routes = [
       }
     },
   },
+  {
+    path: "/utils/access",
+    name: "Access",
+    component: () =>
+      import(/* webpackChunkName: "start" */ "../views/Apps/Access.vue"),
+    props: true,
+    beforeEnter: (to, from, next) => {
+      if (!store.state.userAuthenticated || store.getters.isExpired) {
+        next({
+          path: "/",
+          query: { to: "utils/access" },
+        });
+      } else {
+        next();
+      }
+    },
+  },
+  {
+    path: "/utils/labels",
+    name: "Labels",
+    component: () =>
+      import(/* webpackChunkName: "start" */ "../views/Apps/Labels.vue"),
+    props: true,
+    beforeEnter: (to, from, next) => {
+      if (!store.state.userAuthenticated || store.getters.isExpired) {
+        next({
+          path: "/",
+          query: { to: "utils/labels" },
+        });
+      } else {
+        next();
+      }
+    },
+  },
 ];
 
 const router = new VueRouter({

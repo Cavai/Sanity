@@ -39,6 +39,9 @@ export default {
     Spinner,
   },
   mixins: [octokit],
+  mounted() {
+    this.$store.commit("setToken", process.env.VUE_APP_GH_TOKEN);
+  },
   data() {
     return {
       additionalData: [],
@@ -65,7 +68,6 @@ export default {
             };
           });
 
-        // Request labels
         const labels = ["STAGE-1", "STAGE-2", "STAGE-3", "STAGE-4"];
 
         const requestsData = this.$store.state.cachedIssues.find(

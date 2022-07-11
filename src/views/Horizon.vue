@@ -42,10 +42,7 @@
           class="sub-menu-repository"
         >
           <Option
-            v-for="repo in [
-              { name: 'All', id: 0 },
-              ...$store.state.cachedRepositories,
-            ]"
+            v-for="repo in [{ name: 'All', id: 0 }, ...userRepositories]"
             :value="repo.name"
             :key="repo.id"
           >
@@ -63,7 +60,7 @@
           class="sub-menu-date-picker"
         ></DatePicker>
       </FormItem>
-      <FormItem style="margin-top: 24px">
+      <FormItem style="margin-top: 23px">
         <Button
           class="sub-menu-search"
           icon="ios-search-outline"
@@ -71,19 +68,21 @@
           >Search</Button
         >
       </FormItem>
+      <FormItem class="sub-menu-sparkline-container" v-if="commitsDates.length">
+        <Tooltip content="Commits over time">
+          <SparkLine
+            :initialDates="selectedDateRange"
+            :commits="commitsDates"
+            :key="reRenderSparkLine"
+          />
+        </Tooltip>
+      </FormItem>
     </Form>
-    <!-- <Tabs v-if="commitsData.length" v-model="paneSelected">
-      <TabPane label="Timeline" name="timeline">
-        <div class="horizon-content-timeline">
-          <HorizonTimeLine />
-        </div>
-      </TabPane>
-      <TabPane label="Table" name="table">
-        <div class="horizon-content-table"> -->
-    <HorizonTable v-if="commitsData.length" :commitsData="commitsData" />
-    <!-- </div>
-      </TabPane>
-    </Tabs> -->
+    <HorizonTable
+      v-if="commitsData.length"
+      :commitsData="commitsData"
+      :engineer="selectedUser"
+    />
   </div>
 </template>
 
@@ -94,7 +93,7 @@ import octokit from "@/mixins/octokit";
 
 import Header from "@/components/Header.vue";
 import HorizonTable from "@/components/HorizonTable.vue";
-// import HorizonTimeLine from "@/components/HorizonTimeLine.vue";
+import SparkLine from "@/components/SparkLine.vue";
 import Spinner from "@/components/Spinner.vue";
 
 export default {
@@ -104,20 +103,28 @@ export default {
   components: {
     Header,
     HorizonTable,
-    // HorizonTimeLine,
+    SparkLine,
     Spinner,
   },
   mounted() {
+    this.$store.commit("setToken", process.env.VUE_APP_GH_TOKEN_ALT);
+
+    if (!this.$store.state.cachedUsers) {
+      this.getMembers();
+      return;
+    }
+
+    if (!this.$store.state.cachedRepositories[0].collaborators) {
+      this.getRepositoriesCollaborators();
+      return;
+    }
+
     if (this.$route.params.engineer) {
       const engineer = this.$store.state.cachedUsers.find(
         (user) => this.$route.params.engineer === user.login.toLowerCase()
       );
 
       this.selectedUser = engineer ? engineer.login : null;
-
-      this.$nextTick(() => {
-        this.getHorizonData();
-      });
     }
   },
   data() {
@@ -129,11 +136,11 @@ export default {
         type: "error",
       },
       showSpinner: false,
-      paneSelected: "table",
       selectedUser: null,
       selectedRepositories: ["All"],
+      userRepositories: [],
       selectedDateRange: [
-        moment().subtract(7, "days").format(),
+        moment().subtract(3, "days").format(),
         moment().format(),
       ],
       pickerShortcuts: {
@@ -186,6 +193,8 @@ export default {
         ],
       },
       commitsData: [],
+      reRenderSparkLine: false,
+      rateLimit: 0,
     };
   },
   computed: {
@@ -196,8 +205,124 @@ export default {
           ).avatar_url
         : null;
     },
+    commitsDates() {
+      return this.commitsData
+        .map((branch) => branch.commits)
+        .flat()
+        .map((commit) => commit.commit.author.date)
+        .sort((a, b) => moment(b).format("X") - moment(a).format("X"));
+    },
   },
   methods: {
+    async getMembers() {
+      this.showSpinner = true;
+
+      // Users
+      try {
+        const { data: users } = await this.octokit.orgs.listMembers({
+          org: process.env.VUE_APP_ORGANISATION,
+          per_page: 100,
+        });
+
+        this.$store.commit(
+          "setCachedUsers",
+          users.sort((a, b) =>
+            a.login.toLowerCase().localeCompare(b.login.toLowerCase())
+          )
+        );
+
+        this.getRepositoriesCollaborators();
+      } catch (error) {
+        this.showAlert(
+          `An error has occured with the data fetch`,
+          `Please try again in a few minutes.`,
+          "error"
+        );
+
+        this.$store.commit("logoutUser");
+
+        return;
+      }
+    },
+    async getRepositoriesCollaborators() {
+      this.showSpinner = true;
+
+      this.octokit.rateLimit.get().then(({ data }) => {
+        this.rateLimit = data.rate.remaining;
+      });
+
+      const repositoriesCollaboratorsPromises = [];
+
+      this.$store.state.cachedRepositories.forEach((repo) => {
+        repositoriesCollaboratorsPromises.push(
+          this.octokit.repos.listCollaborators({
+            owner: process.env.VUE_APP_ORGANISATION,
+            repo: repo.name,
+            per_page: 50,
+          })
+        );
+      });
+
+      Promise.allSettled(repositoriesCollaboratorsPromises)
+        .then((collaborators) => {
+          const cachedRepos = this.$store.state.cachedRepositories;
+
+          collaborators.forEach((repository, index) => {
+            cachedRepos[index] = {
+              ...cachedRepos[index],
+              collaborators: repository.value.data,
+            };
+          });
+
+          this.$store.commit(
+            "setCachedRepositories",
+            cachedRepos.sort((a, b) =>
+              a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+            )
+          );
+
+          if (this.$route.params.engineer) {
+            const engineer = this.$store.state.cachedUsers.find(
+              (user) => this.$route.params.engineer === user.login.toLowerCase()
+            );
+
+            this.selectedUser = engineer ? engineer.login : null;
+
+            this.userRepositories = this.$store.state.cachedRepositories.filter(
+              (repository) => {
+                return repository.collaborators
+                  .map((collaborator) => collaborator.login)
+                  .includes(this.$store.state.user.login);
+              }
+            );
+          }
+
+          this.octokit.rateLimit.get().then(({ data }) => {
+            console.log(
+              `%c ** REMAINING RATE LIMIT ${data.rate.remaining} **`,
+              "background: #0D47A1; color: #FFFFFF"
+            );
+
+            console.log(
+              `%c ** COLLABORATORS DATA FETCHING COST ${
+                this.rateLimit - data.rate.remaining
+              } **`,
+              "background: #0DA12F; color: #FFFFFF"
+            );
+          });
+
+          this.showSpinner = false;
+        })
+        .catch(() => {
+          this.showAlert(
+            `An error has occured with the data fetch`,
+            `Please try again in a few minutes.`,
+            "error"
+          );
+
+          return;
+        });
+    },
     maxTagPlaceholder(num) {
       return `+${num} more`;
     },
@@ -211,9 +336,16 @@ export default {
         return false;
       }
 
+      this.octokit.rateLimit.get().then(({ data }) => {
+        this.rateLimit = data.rate.remaining;
+      });
+
       this.showSpinner = true;
 
       try {
+        this.octokit.rateLimit.get().then(({ data }) => {
+          this.rateLimit = data.rate.remaining;
+        });
 
         this.commitsData = [];
         const commitsPromises = [];
@@ -234,27 +366,27 @@ export default {
                   per_page: 100,
                 })
               );
-            })
+            });
           });
         } else {
           this.selectedRepositories.forEach((repository) => {
             this.$store.state.cachedRepositories
-              .find(repo => repo.name === repository).branches
-              .forEach((branch) => {
-              commitsPromises.push(
-                this.octokit.repos.listCommits({
-                  owner: process.env.VUE_APP_ORGANISATION,
-                  repo: repository,
-                  sha: branch.name,
-                  author: this.selectedUser,
-                  since: moment(this.selectedDateRange[0]).toISOString(),
-                  until: moment(this.selectedDateRange[1])
-                    .add("1", "day")
-                    .toISOString(),
-                  per_page: 100,
-                })
-              );
-            });
+              .find((repo) => repo.name === repository)
+              .branches.forEach((branch) => {
+                commitsPromises.push(
+                  this.octokit.repos.listCommits({
+                    owner: process.env.VUE_APP_ORGANISATION,
+                    repo: repository,
+                    sha: branch.name,
+                    author: this.selectedUser,
+                    since: moment(this.selectedDateRange[0]).toISOString(),
+                    until: moment(this.selectedDateRange[1])
+                      .add("1", "day")
+                      .toISOString(),
+                    per_page: 100,
+                  })
+                );
+              });
           });
         }
 
@@ -263,17 +395,27 @@ export default {
         this.commitsData = commits.map((repo) => {
           return {
             commits: repo.value.data,
-            branch: repo.value.url
-                      .split("sha=")[1]
-                      .split("&author")[0],
+            branch: repo.value.url.split("sha=")[1].split("&author")[0],
             repo: repo.value.url
               .split(`${process.env.VUE_APP_ORGANISATION}/`)[1]
               .split("/commits")[0],
           };
         });
 
-      } catch (error) {
+        this.octokit.rateLimit.get().then(({ data }) => {
+          console.log(
+            `%c ** REMAINING RATE LIMIT ${data.rate.remaining} **`,
+            "background: #0D47A1; color: #FFFFFF"
+          );
 
+          console.log(
+            `%c ** COMMITS DATA FETCHING COST ${
+              this.rateLimit - data.rate.remaining
+            } **`,
+            "background: #0DA12F; color: #FFFFFF"
+          );
+        });
+      } catch (error) {
         this.showAlert(
           `An error has occured with the data fetch`,
           `Please try again in a few minutes.`,
@@ -296,17 +438,25 @@ export default {
   },
   watch: {
     selectedRepositories(newVal, oldVal) {
-      // Delete "All"
       if (newVal.length > 1 && oldVal.includes("All")) {
         this.selectedRepositories.splice(
           this.selectedRepositories.indexOf("All"),
           1
         );
       }
-      // Add "All", delete others
+
       if (newVal.length > 1 && newVal.includes("All")) {
         this.selectedRepositories = ["All"];
       }
+    },
+    selectedUser(user) {
+      this.userRepositories = this.$store.state.cachedRepositories.filter(
+        (repository) => {
+          return repository.collaborators
+            .map((collaborator) => collaborator.login)
+            .includes(user);
+        }
+      );
     },
   },
 };

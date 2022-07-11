@@ -12,6 +12,7 @@
 
 .ivu-table {
   border-radius: 2.5px;
+
   box-shadow: 0 4px 12px rgb(0 0 0 / 7%);
 }
 
@@ -34,13 +35,14 @@ i.ivu-icon-ios-funnel.on {
 
 .ivu-table-filter-list {
   color: #404040 !important;
+
   font-family: "Noto Sans", sans-serif !important;
   font-size: 13px !important;
   font-weight: 300 !important;
 
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.16) !important;
   border: 1px solid #d9d9d9 !important;
   border-radius: 2px !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.16) !important;
 
   .ivu-checkbox-focus {
     box-shadow: unset !important;
@@ -48,6 +50,7 @@ i.ivu-icon-ios-funnel.on {
 
   button {
     color: #0b8eba !important;
+
     font-size: 13px;
     font-weight: 600;
     text-transform: uppercase;
@@ -55,10 +58,12 @@ i.ivu-icon-ios-funnel.on {
 }
 
 .ivu-table-cell-tree {
-  float: left;
-  margin-right: 6px;
-  top: 2px;
   position: relative;
+  top: 2px;
+
+  float: left;
+
+  margin-right: 6px;
 }
 
 .ivu-table-cell-tree:not(.ivu-table-cell-tree-empty) {
@@ -73,9 +78,9 @@ i.ivu-icon-ios-funnel.on {
 }
 
 .ivu-table-cell-slot {
-  text-overflow: ellipsis;
-  white-space: nowrap;
   overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .ivu-checkbox-checked .ivu-checkbox-inner {
@@ -87,15 +92,20 @@ i.ivu-icon-ios-funnel.on {
   border: none !important;
 }
 
+.ivu-color-picker-hue:focus,
 .ivu-select-selection-focused,
 .ivu-select-selection:hover,
 .ivu-select-visible .ivu-select-selection,
 .ivu-input:hover,
 .ivu-date-picker-focused input:not([disabled]),
-.ivu-input:focus {
+.ivu-input:focus,
+.ivu-color-picker-focused,
+.ivu-color-picker > div:first-child:hover .ivu-input {
   border-color: #202020;
 }
 
+.ivu-color-picker-hue:focus,
+.ivu-color-picker-focused,
 .ivu-select-visible .ivu-select-selection,
 .ivu-date-picker-focused input:not([disabled]),
 .ivu-input:focus {
@@ -103,8 +113,9 @@ i.ivu-icon-ios-funnel.on {
 }
 
 .ivu-tabs {
-  font-family: "Noto Sans", sans-serif !important;
   color: #0b8eba !important;
+
+  font-family: "Noto Sans", sans-serif !important;
   font-size: 13px;
   font-weight: 400;
   text-transform: uppercase;
@@ -128,5 +139,55 @@ i.ivu-icon-ios-funnel.on {
 
   .ivu-tabs-bar {
     border-bottom: 1px solid #d9d9d9;
+  }
+}
+
+.ivu-select-prefix {
+  position: relative;
+  top: -1px;
+}
+
+.ivu-table-cell {
+  white-space: nowrap;
+}
+
+.ivu-radio-wrapper span {
+  color: #515a6e;
+}
+
+.ivu-radio-checked .ivu-radio-inner {
+  border-color: #0b8eba;
+}
+
+.ivu-radio-inner:after {
+  background-color: #0b8eba;
+}
+
+.ivu-radio-focus {
+  box-shadow: none;
+}
+
+.ivu-color-picker-confirm {
+  button {
+    font-style: normal;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 15px;
+
+    border-radius: 4px;
+
+    transition: box-shadow 0.16s ease-in-out;
+
+    &:first-of-type:hover {
+      color: #515a6e;
+      border-color: #e3e5e8 !important;
+    }
+
+    &:last-of-type {
+      background-image: linear-gradient(180deg, #0c9fcc 50.52%, #0b8eba);
+      background: #0588bf;
+
+      color: #ffffff;
+    }
   }
 }
