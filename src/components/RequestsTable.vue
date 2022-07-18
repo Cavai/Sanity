@@ -235,7 +235,7 @@ export default {
                 pull: true,
                 state: pull.state,
                 children:
-                  pull.commits.length && pull.state === "open"
+                  pull.commits && pull.state === "open"
                     ? pull.commits.map((commit) => ({
                         id: uuidv4(),
                         issue: commit.commit.message,
