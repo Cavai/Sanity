@@ -58,6 +58,17 @@ export default {
   methods: {
     async getInitialData() {
       try {
+
+        if (!this.$store.state.cachedRepositories.find(repository => repository.name === 'Requests')) {
+          this.showAlert(
+            `Your organisation doesn't have Requests repository`,
+            `Requests repository is required for Sanity work.`,
+            "warning"
+          );
+
+          return false;
+        }
+
         const commits = await this.prepareCommits();
         const aggregator = this.$store.state.cachedPullRequests
           .filter((pull) => pull.data.title.includes("RFC"))
@@ -73,16 +84,6 @@ export default {
         const requestsData = this.$store.state.cachedIssues.find(
           (repo) => repo.repo === "Requests"
         );
-
-        if (!requestsData) {
-          this.showAlert(
-            `Your organisation doesn't have Requests repository`,
-            `Requests repository is required for Sanity work.`,
-            "warning"
-          );
-
-          return false;
-        }
 
         const requestsDataFiltered = requestsData.data.filter(
           (issue) =>
