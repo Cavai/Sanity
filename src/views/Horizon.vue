@@ -16,7 +16,12 @@
     </div>
     <Form label-position="top" inline class="sub-menu">
       <FormItem label="Engineer">
-        <Select filterable v-model="selectedUser" class="sub-menu-engineer">
+        <Select
+          clearable
+          filterable
+          v-model="selectedUser"
+          class="sub-menu-engineer"
+        >
           <Avatar
             v-show="selectedUser"
             :src="setAvatar"
