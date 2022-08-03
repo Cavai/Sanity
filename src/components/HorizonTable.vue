@@ -115,10 +115,20 @@ export default {
         }))
       )
       .flat()
+      .filter((commit) => {
+        return moment(
+          moment(commit.commit.author.date).format("YYYY-MM-DD")
+        ).isBetween(
+          moment(this.$parent.selectedDateRange[0]).format("YYYY-MM-DD"),
+          moment(this.$parent.selectedDateRange[1]).format("YYYY-MM-DD"),
+          undefined,
+          "[]"
+        );
+      })
       .map((commit) => {
         return {
           sha: commit.sha,
-          date: moment(new Date(commit.commit.author.date)).format("LLLL"),
+          date: moment(commit.commit.committer.date).format("LLLL"),
           commit: commit.commit.message,
           url: commit.html_url,
           repository: commit.repo,
