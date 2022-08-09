@@ -1,4 +1,13 @@
 #horizon {
+
+  .ivu-table-cell-slot {
+    overflow: unset;
+    white-space: unset;
+    text-overflow: unset;
+
+    display: flex;
+  }
+
   .sub-header {
     height: 45px;
 
@@ -141,6 +150,13 @@
 
         a {
           color: #202020;
+
+          max-width: 90%;
+          display: inline-block;
+
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
         }
 
         .commit-stats {

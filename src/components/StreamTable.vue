@@ -179,6 +179,7 @@ export default {
 
             return moment(b).unix() - moment(a).unix();
           },
+          sortType: 'desc',
           width: 160,
         },
         {
