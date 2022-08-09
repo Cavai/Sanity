@@ -30,7 +30,7 @@
                   (branch) => branch !== row.branch
                 )"
               >
-                {{ branch }}
+                {{ branch.length > 23 ? `${branch.slice(0, 23)}...` : branch }}
               </div>
             </div>
           </Tooltip>
@@ -192,6 +192,7 @@ export default {
 
             return moment(b).unix() - moment(a).unix();
           },
+          sortType: 'desc',
         },
         {
           title: "Commit",
