@@ -314,9 +314,9 @@ export default {
           ],
           filterMultiple: true,
           filterMethod(value, row) {
-            return row.stage === value;
+            return row.stage.name.includes(value);
           },
-          width: 150,
+          width: 200,
         },
         {
           title: "Engineer(s)",

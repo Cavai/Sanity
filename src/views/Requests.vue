@@ -86,8 +86,9 @@ export default {
         );
 
         const requestsDataFiltered = requestsData.data.filter(
-          (issue) =>
-            issue.labels.filter((label) => labels.includes(label.name)).length
+          (issue) => {
+            return issue.labels.map(label => label.name).filter(label => labels.some(originalLabel => label.includes(originalLabel))).length;
+          }
         );
 
         this.rawData = requestsDataFiltered.map((request) => {
