@@ -79,6 +79,7 @@ export default {
             };
           });
 
+        // eslint-disable-next-line no-unused-vars
         const labels = ["STAGE-1", "STAGE-2", "STAGE-3", "STAGE-4"];
 
         const requestsData = this.$store.state.cachedIssues.find(
@@ -86,8 +87,9 @@ export default {
         );
 
         const requestsDataFiltered = requestsData.data.filter(
-          (issue) =>
-            issue.labels.filter((label) => labels.includes(label.name)).length
+          (issue) => {
+            return issue.labels.map(label => label.name).filter(label => labels.some(originalLabel => label.includes(originalLabel))).length;
+          }
         );
 
         this.rawData = requestsDataFiltered.map((request) => {
