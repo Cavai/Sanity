@@ -125,7 +125,7 @@ You now have **Sanity** running locally on https://localhost:8080
 
 2.2.6) Select the `Sanity` repository
 
-2.2.7) Set build output directory to `/public`
+2.2.7) Set build output directory to `/dist`
 
 2.2.8) Add all the environment variables from [.env.example](.env.example)
 
