@@ -58,7 +58,7 @@
       </div>
       <LabelsTable v-if="selectedRepository" :repository="selectedRepository" />
       <RepositoriesTable
-        v-if="!selectedRepository"
+        v-if="!selectedRepository && (dataFetched || toolsDataFetched)"
         @handleRepositorySelection="handleRepositorySelection"
       />
     </div>
@@ -66,8 +66,11 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 import notifications from "@/mixins/notifications";
 import octokit from "@/mixins/octokit";
+import preCache from "@/mixins/preCache";
 
 import Header from "@/components/Header.vue";
 import LabelsTable from "@/components/Apps/LabelsTable.vue";
@@ -77,21 +80,35 @@ import Spinner from "@/components/Spinner.vue";
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: "Labels",
-  mixins: [notifications, octokit],
+  mixins: [notifications, octokit, preCache],
   components: {
     Header,
     LabelsTable,
     RepositoriesTable,
     Spinner,
   },
+  computed: {
+    ...mapState({
+      dataFetched: state => state.dataFetched,
+      toolsDataFetched: state => state.toolsDataFetched,
+    })
+  },
   data() {
     return {
-      showSpinner: false,
+      showSpinner: true,
       selectedRepository: null,
       copyFrom: "",
       copyTo: "",
       copyMethod: "overwrite",
     };
+  },
+  mounted() {
+    if (!this.dataFetched && !this.toolsDataFetched) {
+      this.preCacheToolsData();
+      return;
+    }
+
+    this.showSpinner = false;
   },
   methods: {
     handleLabelsCopy() {

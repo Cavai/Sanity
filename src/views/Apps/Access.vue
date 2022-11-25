@@ -6,14 +6,17 @@
       <h2>Access</h2>
     </div>
     <div class="access-content">
-      <AccessTable v-if="$store.state.cachedRepositories[0].collaborators" />
+      <AccessTable v-if="(dataFetched || toolsDataFetched) && this.$store.state.cachedRepositories[0].collaborators" />
     </div>
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 import notifications from "@/mixins/notifications";
 import octokit from "@/mixins/octokit";
+import preCache from "@/mixins/preCache";
 
 import AccessTable from "@/components/Apps/AccessTable.vue";
 import Header from "@/components/Header.vue";
@@ -23,7 +26,7 @@ import Spinner from "@/components/Spinner.vue";
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: "Access",
-  mixins: [notifications, octokit],
+  mixins: [notifications, octokit, preCache],
   components: {
     AccessTable,
     Header,
@@ -31,13 +34,27 @@ export default {
   },
   data() {
     return {
-      showSpinner: false,
+      showSpinner: true,
     };
   },
+  computed: {
+    ...mapState({
+      dataFetched: state => state.dataFetched,
+      toolsDataFetched: state => state.toolsDataFetched,
+    })
+  },
   mounted() {
-    if (!this.$store.state.cachedRepositories[0].collaborators) {
-      this.getRepositoriesCollaborators();
+    if (!this.dataFetched && !this.toolsDataFetched) {
+      this.preCacheToolsData();
+      return;
     }
+
+    if (this.$store.state.cachedRepositories && !this.$store.state.cachedRepositories[0]?.collaborators) {
+      this.getRepositoriesCollaborators();
+      return;
+    }
+
+    this.showSpinner = false;
   },
   methods: {
     async getRepositoriesCollaborators() {
@@ -102,5 +119,14 @@ export default {
         });
     },
   },
+  watch: {
+    toolsDataFetched(status) {
+      if (status) {
+        if (!this.$store.state.cachedRepositories[0].collaborators) {
+          this.getRepositoriesCollaborators();
+        }
+      }
+    }
+  }
 };
 </script>

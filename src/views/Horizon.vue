@@ -92,9 +92,11 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import moment from "moment";
 
 import octokit from "@/mixins/octokit";
+import preCache from "@/mixins/preCache";
 
 import Header from "@/components/Header.vue";
 import HorizonTable from "@/components/HorizonTable.vue";
@@ -104,7 +106,7 @@ import Spinner from "@/components/Spinner.vue";
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: "Horizon",
-  mixins: [octokit],
+  mixins: [octokit, preCache],
   components: {
     Header,
     HorizonTable,
@@ -114,22 +116,8 @@ export default {
   mounted() {
     this.$store.commit("setToken", process.env.VUE_APP_GH_TOKEN_ALT);
 
-    if (!this.$store.state.cachedUsers) {
-      this.getMembers();
-      return;
-    }
-
-    if (!this.$store.state.cachedRepositories[0].collaborators) {
-      this.getRepositoriesCollaborators();
-      return;
-    }
-
-    if (this.$route.params.engineer) {
-      const engineer = this.$store.state.cachedUsers.find(
-        (user) => this.$route.params.engineer === user.login.toLowerCase()
-      );
-
-      this.selectedUser = engineer ? engineer.login : null;
+    if (!this.dataFetched) {
+      this.preCacheData();
     }
   },
   data() {
@@ -140,7 +128,7 @@ export default {
         message: "Please try again in a few minutes.",
         type: "error",
       },
-      showSpinner: false,
+      showSpinner: true,
       selectedUser: null,
       selectedRepositories: ["All"],
       userRepositories: [],
@@ -203,6 +191,9 @@ export default {
     };
   },
   computed: {
+    ...mapState({
+      dataFetched: state => state.dataFetched,
+    }),
     setAvatar() {
       return this.selectedUser
         ? this.$store.state.cachedUsers.find(
@@ -219,15 +210,46 @@ export default {
     },
   },
   methods: {
+    getInitialData() {
+      if (!this.$store.state.cachedUsers) {
+        this.getMembers();
+        return;
+      }
+
+      if (!this.$store.state.cachedRepositories[0].collaborators) {
+        this.getRepositoriesCollaborators();
+        return;
+      }
+
+      if (this.$route.params.engineer) {
+        const engineer = this.$store.state.cachedUsers.find(
+          (user) => this.$route.params.engineer === user.login.toLowerCase()
+        );
+
+        this.selectedUser = engineer ? engineer.login : null;
+      }
+    },
     async getMembers() {
       this.showSpinner = true;
 
       // Users
       try {
-        const { data: users } = await this.octokit.orgs.listMembers({
-          org: process.env.VUE_APP_ORGANISATION,
-          per_page: 100,
-        });
+
+        let data = null;
+
+        if (process.env.VUE_APP_ENGINEERING_TEAM) {
+          data = await this.octokit.teams.listMembersInOrg({
+            org: process.env.VUE_APP_ORGANISATION,
+            team_slug: process.env.VUE_APP_ENGINEERING_TEAM,
+          });
+        } else {
+          data = await this.octokit.orgs.listMembers({
+            org: process.env.VUE_APP_ORGANISATION,
+            per_page: 100,
+          });
+        }
+
+        const { data: users } = data;
 
         this.$store.commit(
           "setCachedUsers",
@@ -442,6 +464,11 @@ export default {
     },
   },
   watch: {
+    dataFetched(status) {
+      if (status) {
+        this.getInitialData();
+      }
+    },
     selectedRepositories(newVal, oldVal) {
       if (newVal.length > 1 && oldVal.includes("All")) {
         this.selectedRepositories.splice(

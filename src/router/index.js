@@ -16,8 +16,25 @@ const routes = [
         next();
       } else {
         next({
-          path: "/requests",
+          path: "/home",
         });
+      }
+    },
+  },
+  {
+    path: "/home",
+    name: "Home",
+    component: () =>
+      import(/* webpackChunkName: "start" */ "../views/Home.vue"),
+    props: true,
+    beforeEnter: (to, from, next) => {
+      if (!store.state.userAuthenticated || store.getters.isExpired) {
+        next({
+          path: "/",
+          query: { to: "home" },
+        });
+      } else {
+        next();
       }
     },
   },

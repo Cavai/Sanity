@@ -29,6 +29,8 @@ export default new Vuex.Store({
     cachedPullRequests: null,
     cachedIssues: null,
     cachedLogo: null,
+    dataFetched: false,
+    toolsDataFetched: false,
   },
   getters: {
     isExpired: (state) => new Date(state.expiryDate) < new Date(),
@@ -48,6 +50,8 @@ export default new Vuex.Store({
       state.cachedPullRequests = null;
       state.cachedIssues = null;
       state.cachedLogo = null;
+      state.dataFetched = false;
+      state.toolsDataFetched = false;
 
       sessionStorage.removeItem("cachedCommits");
     },
@@ -77,5 +81,11 @@ export default new Vuex.Store({
     setCachedLogo: (state, logo) => {
       state.cachedLogo = logo;
     },
+    setDataFetched: (state, value) => {
+      state.dataFetched = value;
+    },
+    setToolsDataFetched: (state, value) => {
+      state.toolsDataFetched = value;
+    }
   },
 });

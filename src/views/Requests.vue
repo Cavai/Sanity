@@ -24,7 +24,10 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 import octokit from "@/mixins/octokit";
+import preCache from "@/mixins/preCache";
 
 import Header from "@/components/Header.vue";
 import RequestsTable from "@/components/RequestsTable.vue";
@@ -38,9 +41,13 @@ export default {
     RequestsTable,
     Spinner,
   },
-  mixins: [octokit],
+  mixins: [octokit, preCache],
   mounted() {
     this.$store.commit("setToken", process.env.VUE_APP_GH_TOKEN);
+
+    if (!this.dataFetched) {
+      this.preCacheData();
+    }
   },
   data() {
     return {
@@ -54,6 +61,11 @@ export default {
       rawData: [],
       showSpinner: true,
     };
+  },
+  computed: {
+    ...mapState({
+      dataFetched: state => state.dataFetched,
+    })
   },
   methods: {
     async getInitialData() {
@@ -158,5 +170,12 @@ export default {
       this.error.show = true;
     },
   },
+  watch: {
+    dataFetched(status) {
+      if (status) {
+        this.getInitialData();
+      }
+    }
+  }
 };
 </script>

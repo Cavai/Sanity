@@ -12,20 +12,27 @@ const octokit = {
       userAgent: "Sanity v0.1",
     });
 
-    this.octokit.rateLimit.get().then((data) => {
-      if (data.data.resources.core.used > data.data.resources.core.limit) {
-        this.showAlert(
-          `Service temporarily unavailable`,
-          `Please try again in a few minutes.`,
-          "error"
-        );
-      } else {
-        if (this.getInitialData) {
-          this.getInitialData();
-        }
-      }
-    });
+    if (this.dataFetched) {
+      this.getData();
+    }
   },
+  methods: {
+    getData() {
+      this.octokit.rateLimit.get().then((data) => {
+        if (data.data.resources.core.used > data.data.resources.core.limit) {
+          this.showAlert(
+            `Service temporarily unavailable`,
+            `Please try again in a few minutes.`,
+            "error"
+          );
+        } else {
+          if (this.getInitialData) {
+            this.getInitialData();
+          }
+        }
+      });
+    }
+  }
 };
 
 export default octokit;
