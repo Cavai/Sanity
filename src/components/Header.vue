@@ -42,7 +42,7 @@ export default {
   mixins: [notifications],
   computed: {
     exportAvailable() {
-      return !["Utils", "Access", "Labels"].includes(this.$route.name);
+      return !["Home", "Utils", "Access", "Labels"].includes(this.$route.name);
     },
   },
   methods: {

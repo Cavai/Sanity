@@ -25,6 +25,9 @@
 
 <script>
 import moment from "moment";
+import { mapState } from 'vuex';
+
+import preCache from "@/mixins/preCache";
 
 import Header from "@/components/Header.vue";
 import Spinner from "@/components/Spinner.vue";
@@ -38,56 +41,14 @@ export default {
     Spinner,
     StreamTable,
   },
+  mixins: [preCache],
   created() {
-    try {
-      const pullsData = this.$store.state.cachedPullRequests
-        .map((pull) => {
-          return {
-            id: pull.id,
-            title: pull.data.title,
-            url: pull.data.html_url,
-            type: "Pull Request",
-            repository: pull.repo,
-            repository_url: `https://github.com/${process.env.VUE_APP_ORGANISATION}/${pull.repo}`,
-            last_activity: moment(pull.data.updated_at).format("DD MMM YYYY"),
-            labels: pull.data.labels,
-            author: pull.data.user,
-            assignees: pull.data.assignees,
-          };
-        })
-        .filter((pull) => {
-          return !pull.author.login.includes("dependabot");
-        });
-
-      const issuesData = this.$store.state.cachedIssues.map((issues) => {
-        return issues.data.map((issue) => {
-          return {
-            id: issue.id,
-            title: issue.title,
-            url: issue.html_url,
-            type: "Issue",
-            repository: issues.repo,
-            repository_url: `https://github.com/${process.env.VUE_APP_ORGANISATION}/${issues.repo}`,
-            last_activity: moment(issue.updated_at).format("DD MMM YYYY"),
-            labels: issue.labels,
-            author: issue.user,
-            assignees: issue.assignees,
-          };
-        });
-      });
-
-      this.rawData = [...pullsData, ...issuesData.flat()];
-    } catch (error) {
-      this.showAlert(
-        `An error has occured with the data fetch`,
-        `Please try again in a few minutes.`,
-        "error"
-      );
-
+    if (!this.dataFetched) {
+      this.preCacheData();
       return;
     }
 
-    this.showSpinner = false;
+    this.getInitialData();
   },
   data() {
     return {
@@ -101,6 +62,11 @@ export default {
       showSpinner: true,
     };
   },
+  computed: {
+    ...mapState({
+      dataFetched: state => state.dataFetched,
+    })
+  },
   methods: {
     showAlert(title, message, type) {
       this.error.title = title ?? this.error.title;
@@ -110,7 +76,65 @@ export default {
       this.showSpinner = false;
       this.error.show = true;
     },
+    getInitialData() {
+      try {
+        const pullsData = this.$store.state.cachedPullRequests
+          .map((pull) => {
+            return {
+              id: pull.id,
+              title: pull.data.title,
+              url: pull.data.html_url,
+              type: "Pull Request",
+              repository: pull.repo,
+              repository_url: `https://github.com/${process.env.VUE_APP_ORGANISATION}/${pull.repo}`,
+              last_activity: moment(pull.data.updated_at).format("DD MMM YYYY"),
+              labels: pull.data.labels,
+              author: pull.data.user,
+              assignees: pull.data.assignees,
+            };
+          })
+          .filter((pull) => {
+            return !pull.author.login.includes("dependabot");
+          });
+
+        const issuesData = this.$store.state.cachedIssues.map((issues) => {
+          return issues.data.map((issue) => {
+            return {
+              id: issue.id,
+              title: issue.title,
+              url: issue.html_url,
+              type: "Issue",
+              repository: issues.repo,
+              repository_url: `https://github.com/${process.env.VUE_APP_ORGANISATION}/${issues.repo}`,
+              last_activity: moment(issue.updated_at).format("DD MMM YYYY"),
+              labels: issue.labels,
+              author: issue.user,
+              assignees: issue.assignees,
+            };
+          });
+        });
+
+        this.rawData = [...pullsData, ...issuesData.flat()];
+      } catch (error) {
+        this.showAlert(
+          `An error has occured with the data fetch`,
+          `Please try again in a few minutes.`,
+          "error"
+        );
+
+        return;
+      }
+
+      this.showSpinner = false;
+    }
   },
+  watch: {
+    dataFetched(status) {
+      if (status) {
+        this.getInitialData();
+      }
+    }
+  }
 };
 </script>
 

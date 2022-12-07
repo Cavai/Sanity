@@ -1,7 +1,7 @@
 @import "access.scss";
 @import "labels.scss";
 
-#utils {
+#home {
   .sub-header {
     height: 45px;
 
@@ -19,13 +19,13 @@
     }
   }
 
-  .utils-content {
-    .utils-content-cards {
+  .home-content {
+    .home-content-cards {
       display: flex;
       justify-content: center;
       align-items: center;
 
-      .utils-card {
+      .home-card {
         cursor: pointer;
 
         width: 300px;
@@ -42,19 +42,19 @@
         border-radius: 2.5px !important;
         box-shadow: 0 4px 12px rgb(0 0 0 / 7%);
 
-        .utils-card-image {
+        .home-card-image {
           width: 100%;
           height: 75%;
 
           background-size: cover;
           background-position: center;
 
-          &.card-labels {
-            background-image: url("../assets/home-improvements.png");
+          &.card-horizons {
+            background-image: url("../assets/horizons.png");
           }
 
-          &.card-access {
-            background-image: url("../assets/reset-password.png");
+          &.card-maintenance {
+            background-image: url("../assets/maintenance.png");
           }
         }
 
@@ -69,7 +69,7 @@
           padding-bottom: 10px;
         }
 
-        .utils-card-icon {
+        .home-card-icon {
           border: 1px solid #808080;
           color: #808080;
           border-radius: 50%;
