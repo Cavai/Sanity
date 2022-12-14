@@ -83,7 +83,8 @@ export default {
       }
 
       const provider = new firebase.auth.GithubAuthProvider();
-      provider.addScope("user");
+      provider.addScope("read:user");
+      provider.addScope("read:org");
 
       firebase
         .auth()
@@ -98,9 +99,8 @@ export default {
           });
 
           octokit.orgs
-            .getMembershipForUser({
+            .getMembershipForAuthenticatedUser({
               org: process.env.VUE_APP_ORGANISATION,
-              username: result.additionalUserInfo.username,
             })
             .then(() => {
               this.$store.commit("authenticateUser", {
