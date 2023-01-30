@@ -118,7 +118,10 @@ export default {
 
     if (!this.dataFetched) {
       this.preCacheData();
+      return;
     }
+
+    this.showSpinner = false;
   },
   data() {
     return {

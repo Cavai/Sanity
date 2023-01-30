@@ -54,6 +54,7 @@ export default new Vuex.Store({
       state.toolsDataFetched = false;
 
       sessionStorage.removeItem("cachedCommits");
+      ls.removeAll();
     },
     setToken: (state, token) => {
       state.authenticationToken = token;
