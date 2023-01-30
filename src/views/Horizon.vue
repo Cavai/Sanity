@@ -1,6 +1,6 @@
 <template>
   <div id="horizon">
-    <Spinner v-if="showSpinner && !commitsData.length" />
+    <Spinner v-if="showSpinner" />
     <Alert
       v-if="error.show"
       :type="error.type"
