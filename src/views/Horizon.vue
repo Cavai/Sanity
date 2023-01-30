@@ -1,6 +1,6 @@
 <template>
   <div id="horizon">
-    <Spinner v-if="showSpinner" />
+    <Spinner v-if="showSpinner && !commitsData.length" />
     <Alert
       v-if="error.show"
       :type="error.type"
@@ -118,7 +118,10 @@ export default {
 
     if (!this.dataFetched) {
       this.preCacheData();
+      return;
     }
+
+    this.showSpinner = false;
   },
   data() {
     return {

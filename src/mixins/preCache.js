@@ -196,11 +196,6 @@ const preCache = {
       }
 
       this.showSpinner = false;
-      // if (this.$route.query.to) {
-      //   this.$router.push(`/${this.$route.query.to}`);
-      // } else {
-      //   this.$router.push("/requests");
-      // }
     },
   }
 }
