@@ -11,15 +11,6 @@ const routes = [
     name: "Login",
     component: () =>
       import(/* webpackChunkName: "start" */ "../views/Login.vue"),
-    beforeEnter: (to, from, next) => {
-      if (!store.state.userAuthenticated || store.getters.isExpired) {
-        next();
-      } else {
-        next({
-          path: "/home",
-        });
-      }
-    },
   },
   {
     path: "/home",
@@ -27,16 +18,6 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "start" */ "../views/Home.vue"),
     props: true,
-    beforeEnter: (to, from, next) => {
-      if (!store.state.userAuthenticated || store.getters.isExpired) {
-        next({
-          path: "/",
-          query: { to: "home" },
-        });
-      } else {
-        next();
-      }
-    },
   },
   {
     path: "/requests",
@@ -44,16 +25,6 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "start" */ "../views/Requests.vue"),
     props: true,
-    beforeEnter: (to, from, next) => {
-      if (!store.state.userAuthenticated || store.getters.isExpired) {
-        next({
-          path: "/",
-          query: { to: "requests" },
-        });
-      } else {
-        next();
-      }
-    },
   },
   {
     path: "/stream",
@@ -61,16 +32,6 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "start" */ "../views/Stream.vue"),
     props: true,
-    beforeEnter: (to, from, next) => {
-      if (!store.state.userAuthenticated || store.getters.isExpired) {
-        next({
-          path: "/",
-          query: { to: "stream" },
-        });
-      } else {
-        next();
-      }
-    },
   },
   {
     path: "/horizon",
@@ -78,16 +39,6 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "start" */ "../views/Horizon.vue"),
     props: true,
-    beforeEnter: (to, from, next) => {
-      if (!store.state.userAuthenticated || store.getters.isExpired) {
-        next({
-          path: "/",
-          query: { to: "horizon" },
-        });
-      } else {
-        next();
-      }
-    },
   },
   {
     path: "/horizon/:engineer",
@@ -95,16 +46,6 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "horizon" */ "../views/Horizon.vue"),
     props: true,
-    beforeEnter: (to, from, next) => {
-      if (!store.state.userAuthenticated || store.getters.isExpired) {
-        next({
-          path: "/",
-          query: { to: "horizon" },
-        });
-      } else {
-        next();
-      }
-    },
   },
   {
     path: "/utils",
@@ -112,16 +53,6 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "start" */ "../views/Utils.vue"),
     props: true,
-    beforeEnter: (to, from, next) => {
-      if (!store.state.userAuthenticated || store.getters.isExpired) {
-        next({
-          path: "/",
-          query: { to: "utils" },
-        });
-      } else {
-        next();
-      }
-    },
   },
   {
     path: "/utils/access",
@@ -129,16 +60,6 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "start" */ "../views/Apps/Access.vue"),
     props: true,
-    beforeEnter: (to, from, next) => {
-      if (!store.state.userAuthenticated || store.getters.isExpired) {
-        next({
-          path: "/",
-          query: { to: "utils/access" },
-        });
-      } else {
-        next();
-      }
-    },
   },
   {
     path: "/utils/labels",
@@ -146,16 +67,6 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "start" */ "../views/Apps/Labels.vue"),
     props: true,
-    beforeEnter: (to, from, next) => {
-      if (!store.state.userAuthenticated || store.getters.isExpired) {
-        next({
-          path: "/",
-          query: { to: "utils/labels" },
-        });
-      } else {
-        next();
-      }
-    },
   },
 ];
 
@@ -163,6 +74,34 @@ const router = new VueRouter({
   mode: "history",
   base: process.env.BASE_URL,
   routes,
+});
+
+router.beforeResolve((to, from, next) => {
+  if (!store.state.userAuthenticated || store.getters.isExpired) {
+    store.commit("logoutUser");
+
+    if (to.path === "/") {
+      next();
+      return;
+    }
+
+    next({
+      path: "/",
+      query: { to: to.path.substring(1) },
+    });
+
+  } else {
+    if (to.path === "/") {
+      next({
+        path: "/home",
+      });
+      return;
+    }
+
+    next();
+
+    return;
+  }
 });
 
 export default router;

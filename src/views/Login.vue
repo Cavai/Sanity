@@ -159,6 +159,11 @@ export default {
           // this.$store.commit("setToken", process.env.VUE_APP_GH_TOKEN_ALT);
         }
 
+        if (this.$route.query?.to) {
+          this.$router.push(`/${this.$route.query.to}`);
+          return;
+        }
+
         this.$router.push("/home");
       });
     },
