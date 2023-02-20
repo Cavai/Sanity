@@ -65,6 +65,12 @@ const preCache = {
       this.showSpinner = false;
     },
     async preCacheData() {
+
+      let requestPrefix = process.env.VUE_APP_REQUEST_PREFIX.split(',');
+      if (requestPrefix.length === 1 && requestPrefix[0] === "") {
+        requestPrefix = ["RFC"];
+      }
+
       this.octokit.rateLimit.get().then(({ data }) => {
         this.rateLimit = data.rate.remaining;
       });
@@ -150,7 +156,7 @@ const preCache = {
           .flat()
           .filter((pull) => {
             return (
-              pull.data.state === "open" || pull.data.title.includes("RFC")
+              pull.data.state === "open" || requestPrefix.some((prefix) => pull.data.title.includes(prefix))
             );
           });
 

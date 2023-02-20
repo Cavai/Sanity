@@ -68,6 +68,23 @@ const routes = [
       import(/* webpackChunkName: "start" */ "../views/Apps/Labels.vue"),
     props: true,
   },
+  {
+    path: "*",
+    name: "Not Found",
+    component: () =>
+      import(/* webpackChunkName: "start" */ "../views/Home.vue"),
+    props: true,
+    beforeEnter: (to, from, next) => {
+      if (!store.state.userAuthenticated || store.getters.isExpired) {
+        next({
+          path: "/",
+          query: { to: "home" },
+        });
+      } else {
+        next();
+      }
+    },
+  },
 ];
 
 const router = new VueRouter({
