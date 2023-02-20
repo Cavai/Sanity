@@ -88,7 +88,7 @@
       </template>
       <template slot-scope="{ row }" slot="stage">
         <div class="labels-container" v-if="row.stage !== null">
-          <div class="label" :style="generateLabelStyles(row.stage.color)">
+          <div v-if="row.stage.name" class="label" :style="generateLabelStyles(row.stage.color)">
             {{ row.stage.name }}
           </div>
         </div>
@@ -132,6 +132,17 @@ import notifications from "@/mixins/notifications";
 import octokit from "@/mixins/octokit";
 
 import SparkLine from "@/components/SparkLine.vue";
+
+const defaultFilters = [
+  {
+    label: 'RFC',
+    value: 'RFC',
+  },
+  {
+    label: 'RFW',
+    value: 'RFW',
+  }
+];
 
 export default {
   name: "RequestsTable",
@@ -217,12 +228,12 @@ export default {
           tasks_not_done: tasksNotDone,
           stage: {
             name: request.labels.find((label) => label.name.includes("STAGE"))
-              .name,
+              ?.name,
             color: request.labels.find((label) => label.name.includes("STAGE"))
-              .color,
+              ?.color,
           },
           engineers: request.assignees,
-          children: request.pulls.length
+          children: process.env.VUE_APP_DISABLE_REQUEST_PRS_COMMITS === "true" && request.pulls.length
             ? request.pulls.map((pull) => ({
                 id: uuidv4(),
                 issue: pull.title,
@@ -268,9 +279,15 @@ export default {
         {
           title: "Name",
           slot: "issue",
+          key: "issue",
           sortable: true,
           tree: true,
           minWidth: 200,
+          filters: process.env.VUE_APP_REQUEST_FILTER_OPTIONS ? process.env.VUE_APP_REQUEST_FILTER_OPTIONS.split(',').map((filter) => ({ label: filter, value: filter })) : defaultFilters,
+          filterMultiple: true,
+          filterMethod(value, row) {
+            return row.issue.includes(value);
+          },
         },
         {
           title: "Commits",

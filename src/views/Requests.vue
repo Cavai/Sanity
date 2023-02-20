@@ -71,6 +71,11 @@ export default {
     async getInitialData() {
       try {
 
+        let requestPrefix = process.env.VUE_APP_REQUEST_PREFIX.split(',');
+        if (requestPrefix.length === 1 && requestPrefix[0] === "") {
+          requestPrefix = ["RFC"];
+        }
+
         if (!this.$store.state.cachedRepositories.find(repository => repository.name === 'Requests')) {
           this.showAlert(
             `Your organisation doesn't have Requests repository`,
@@ -83,7 +88,7 @@ export default {
 
         const commits = await this.prepareCommits();
         const aggregator = this.$store.state.cachedPullRequests
-          .filter((pull) => pull.data.title.includes("RFC"))
+          .filter((pull) => requestPrefix.some((prefix) => pull.data.title.includes(prefix)))
           .map((pull, index) => {
             return {
               ...pull,
@@ -99,7 +104,7 @@ export default {
 
         const requestsDataFiltered = requestsData.data.filter(
           (issue) => {
-            return issue.labels.map(label => label.name).filter(label => labels.some(originalLabel => label.includes(originalLabel))).length;
+            return process.env.VUE_APP_DISABLE_REQUEST_LABELS ? issue : issue.labels.map(label => label.name).filter(label => labels.some(originalLabel => label.includes(originalLabel))).length;
           }
         );
 
@@ -131,9 +136,15 @@ export default {
     },
     async prepareCommits() {
       try {
+
+        let requestPrefix = process.env.VUE_APP_REQUEST_PREFIX.split(',');
+        if (requestPrefix.length === 1 && requestPrefix[0] === "") {
+          requestPrefix = ["RFC"];
+        }
+
         if (!sessionStorage.getItem("cachedCommits")) {
           const commitsPromises = this.$store.state.cachedPullRequests
-            .filter((pull) => pull.data.title.includes("RFC"))
+            .filter((pull) => requestPrefix.some((prefix) => pull.data.title.includes(prefix)))
             .map((pull) => {
               return this.octokit.pulls.listCommits({
                 owner: process.env.VUE_APP_ORGANISATION,
